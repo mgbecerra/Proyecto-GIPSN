@@ -1,4 +1,4 @@
-<img src="https://github.com/mgbecerra/ProyectoGIPSN/raw/master/logo_JPG.jpg" width="300">
+<img src="https://github.com/mgbecerra/ProyectoGIPSN/raw/master/banner-GIPS.png" width="600">
 
 ## Política Electoral Subnacional: análisis longitudinal de indicadores políticos
 
