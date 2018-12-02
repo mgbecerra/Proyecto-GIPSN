@@ -22,7 +22,8 @@ El presente proyecto analiza la dimensión electoral de la política subnacional
 
 **El equipo del GIPSN está conformado por:**
 
-* Dr. Jorge Aragón
-* Lic. María Gracia Becerra
-* Lic. Francisco Aguilar
- 
+* Jorge Aragón
+* Francisco Aguilar
+* María Gracia Becerra
+* José Incio 
+
