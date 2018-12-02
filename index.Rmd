@@ -6,7 +6,7 @@
 
 -----
 
-El presente proyecto analiza la dimensión electoral de la política subnacional en el Perú. A partir de ello, se buscan identificar los principales cambios y continuidades de la dinámica subnacional del país. 
+El presente proyecto analiza la dimensión electoral de la política subnacional en el Perú. A partir del análisis de distintos indicadores políticos, se buscan identificar los principales cambios y continuidades de la dinámica subnacional del país. 
 
 #### Análisis de Fragmentación
 
