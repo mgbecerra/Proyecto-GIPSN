@@ -1,16 +1,16 @@
 <img src="https://github.com/mgbecerra/ProyectoGIPSN/raw/master/banner-GIPS.png" width="600">
 
-## Política Electoral Subnacional: análisis longitudinal de indicadores políticos
+### Política Electoral Subnacional: Análisis longitudinal de indicadores políticos
 
 #### Elaborado por el [Grupo de Investigación de Política Subnacional](#team)
 
 -----
 
-### Análisis de Fragmentación
+#### Análisis de Fragmentación
 
-### Análisis de Competitividad
+#### Análisis de Competitividad
 
-### Análisis de Concentración
+#### Análisis de Concentración
 
 ------
 
