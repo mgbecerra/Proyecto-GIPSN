@@ -1,0 +1,24 @@
+<img src="https://github.com/mgbecerra/ProyectoGIPSN/raw/master/logo_JPG.jpg" width="300">
+
+## Política Electoral Subnacional: análisis longitudinal de indicadores políticos
+
+#### Elaborado por el [Grupo de Investigación de Política Subnacional](#team)
+
+-----
+
+### Análisis de Fragmentación
+
+### Análisis de Competitividad
+
+### Análisis de Concentración
+
+------
+
+<a id='team'></a>
+
+**El equipo del GIPSN está conformado por:**
+
+* Dr. Jorge Aragón
+* Lic. María Gracia Becerra
+* Lic. Francisco Aguilar
+ 
