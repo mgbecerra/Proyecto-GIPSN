@@ -6,15 +6,48 @@
 
 -----
 
-El presente proyecto analiza la dimensión electoral de la política subnacional en el Perú. A partir del análisis de distintos indicadores políticos, se buscan identificar los principales cambios y continuidades de la dinámica subnacional del país. 
+El presente proyecto analiza la dimensión electoral de la política subnacional en el Perú. A partir del análisis de tres indicadores políticos, se buscan identificar los principales cambios y continuidades de la dinámica subnacional del país. Se contruye a partir del trabajo de Aragón (2010). 
+
+  * [Análisis de Fragmentación](#D1)
+  * [Análisis de Competitividad](#D2)
+  * [Análisis de Concentración](#D3)
 
 #### Análisis de Fragmentación
 
+<a id='D1'></a> 
+
+El concepto de fragmentación electoral alude a la dispersión de los votos emitidos en relación con las opciones políticas (partidos, organizaciones o candidatos) que compiten en una determinada elección. Un indicador comúnmente usado para medir el grado de fragmentación
+electoral en un proceso electoral particular es el *Número Efectivo de Partidos (NEP).*
+
+**Nivel Regional**
+
+**Nivel Provincial**
+
+**Nivel Distrital**
+
 #### Análisis de Competitividad
+
+<a id='D2'></a> 
+
+El concepto de competitividad electoral alude a la distancia que se ha producido entre los partidos, organizaciones o candidatos que ocuparon el primer y el segundo lugar en un determinado proceso electoral. Por lo tanto el indicador comúnmente usado para medir el grado de competitividad registra la diferencia en el porcentaje de votos válidos emitidos entre las opciones electorales que quedaron en primer y segundo lugar.
+
+**Nivel Regional**
+
+**Nivel Provincial**
+
+**Nivel Distrital**
 
 #### Análisis de Concentración
 
-#### Análisis de Ausentismo
+<a id='D3'></a> 
+
+El concepto de concentración electoral alude a la capacidad que tuvieron las dos opciones electorales más votadas para atraer las preferencias electorales. El indicador de concentración electoral más comúnmente usado registra valores que van en un rango de 0 a 1, donde 0 corresponde al mínimo y 1 al máximo de la concentración electoral.
+
+**Nivel Regional**
+
+**Nivel Provincial**
+
+**Nivel Distrital**
 
 ------
 
@@ -25,5 +58,3 @@ El presente proyecto analiza la dimensión electoral de la política subnacional
 * Jorge Aragón
 * Francisco Aguilar
 * María Gracia Becerra
-* José Incio 
-
