@@ -173,8 +173,8 @@ plot(info_5,col='#b30000',lty=0,add = TRUE,border=NA)
 plot(peruframe, col="white",border=NA)
 
 legend("center",title='NEP',
-       legend=c("0 - 2", "2 - 4", "4 - 6", "6 - 8", "8 - 10"),
-       fill=c('#fef0d9','#fdcc8a',"#fc8d59", "#e34a33", "#b30000"),cex=1.5,bty = "n")
+       legend=c("0.00 - 2.00", "2.00 - 4.00", "4.00 - 6.00", "6.00 - 8.00", "8.00 - 10.00"),
+       fill=c('#fef0d9','#fdcc8a',"#fc8d59", "#e34a33", "#b30000"),cex=1.2,bty = "n")
 
 ```
 
@@ -290,7 +290,7 @@ plot(peruframe, col="white",border=NA)
 
 legend("center",title='competitividad',
        legend=c("0.00 - 0.08", "0.08 - 0.16", "0.16 - 0.24", "0.24 - 0.32", "0.32 - 0.40"),
-       fill=c('#fef0d9','#fdcc8a',"#fc8d59", "#e34a33", "#b30000"),cex=1.5,bty = "n")
+       fill=c('#fef0d9','#fdcc8a',"#fc8d59", "#e34a33", "#b30000"),cex=1.2,bty = "n")
 
 ```
 
@@ -404,7 +404,7 @@ plot(peruframe, col="white",border=NA)
 
 legend("center",title='concentracion',
        legend=c("0.00 - 0.20", "0.20 - 0.40", "0.40 - 0.60", "0.60 - 0.80", "0.80 - 1.00"),
-       fill=c('#fef0d9','#fdcc8a',"#fc8d59", "#e34a33", "#b30000"),cex=1.5,bty = "n")
+       fill=c('#fef0d9','#fdcc8a',"#fc8d59", "#e34a33", "#b30000"),cex=1.2,bty = "n")
 
 ```
 
