@@ -54,36 +54,59 @@ data_finalGR18  = data_finalGR18 %>%
           mutate (validosGR18 = emitidosGR18-blancosnulosGR18) 
 ```
 
-Indicadores políticos
+
+###Indicadores políticos 
+
+###### Concentración:
 
 ```{r}
-ganadoresGR = dataGR18[order(dataGR18$ID, -as.numeric(dataGR18$VOTOSORG_TOTAL)),] 
+ganadoresGR =dataGR18 %>% group_by(ID,NOMBRE_ORGANIZACION) %>% summarise(votos = sum(as.numeric(VOTOSORG_TOTAL), na.rm = T))  %>% mutate(ganadorGR18 = NOMBRE_ORGANIZACION)
+```
 
-ganadoresGR = ganadoresGR[!ganadoresGR$NOMBRE_ORGANIZACION == "VOTOS EN BLANCO" & !ganadoresGR$NOMBRE_ORGANIZACION =="VOTOS NULOS",]
+```{r}
+ganadoresGR = ganadoresGR [order(ganadoresGR$ID, -ganadoresGR$votos),] 
 ```
 
 Votos ganador
-
 ```{r}
-primero = ganadoresGR %>% group_by(ID) %>% filter(row_number()==1) %>% mutate(primeroGR18=as.numeric(VOTOSORG_TOTAL))
+primero = ganadoresGR %>% group_by(ID) %>% filter(row_number()==1) %>% mutate(primeroGR18=votos)
 
-data_finalGR18 = left_join(data_finalGR18, primero[c(1,9)], by="ID") #join 
+data_finalGR18 = left_join(data_finalGR18, primero[c(1,5)], by="ID") #join 
 ```
 
 Votos segundo
 ```{r}
-segundo = ganadoresGR %>% group_by(ID) %>% filter(row_number()==2) %>% mutate(segundoGR18=as.numeric(VOTOSORG_TOTAL))
+segundo = ganadoresGR %>% group_by(ID) %>% filter(row_number()==2) %>% mutate(segundoGR18=votos)
 
-data_finalGR18 = left_join(data_finalGR18, segundo[c(1,9)], by="ID") #join 
+data_finalGR18 = left_join(data_finalGR18, segundo[c(1,5)], by="ID") #join 
 ```
 
-Nep:
+Calculo concentración:
+
+```{r}
+data_finalGR18 = data_finalGR18 %>% mutate(concentracionGR18 = primeroGR18/validosGR18 + segundoGR18/validosGR18)
+```
+
+Calculo competitividad:
+
+```{r}
+data_finalGR18 = data_finalGR18 %>% mutate(competitividadGR18 = primeroGR18/validosGR18 - segundoGR18/validosGR18)
+```
+
+###### NEP Y Herfindahl
+
+
+```{r}
+ganadoresGR = left_join(ganadoresGR, data_finalGR18[c(1,8)], by="ID") #join 
+```
 
 Calcular proporción de votos validos 
 
 ```{r}
-ganadoresGR$prop_votos2 = (as.numeric(ganadoresGR$VOTOSORG_TOTAL)/as.numeric(ganadoresGR$VALIDOS_TOTAL))^2
+ganadoresGR$prop_votos2 = (ganadoresGR$votos/ganadoresGR$validosGR18)^2
 ```
+
+NEP y Herfindahl por distrito:
 
 ```{r}
 NEP = ganadoresGR %>% group_by(ID) %>% 
@@ -92,17 +115,7 @@ NEP = ganadoresGR %>% group_by(ID) %>%
 data_finalGR18 = left_join(data_finalGR18, NEP, by="ID") #join 
 ```
 
-Concentración:
-
-```{r}
-data_finalGR18 = data_finalGR18 %>% mutate(concentracionGR18 = primeroGR18/validosGR18 + segundoGR18/validosGR18)
-```
-
-Competitividad:
-
-```{r}
-data_finalGR18 = data_finalGR18 %>% mutate(competitividadGR18 = primeroGR18/validosGR18 - segundoGR18/validosGR18)
-```
+## 2014
 
 ###Carga data: 
 
@@ -184,45 +197,33 @@ dataGR14= dataGR14[!dataGR14$TIPOORGPOL == "VOTOS NULOS",]
 Ordenar tabla según votos
 
 ```{r}
-ganadoresGR = dataGR14[order(dataGR14$TXUBIGEOREGION, -dataGR14$VOTOS),] 
+dataGR14 <- dataGR14[order(dataGR14$TXUBIGEO, -dataGR14$VOTOS),] 
+```
+
+###Indicadores políticos 
+
+###### Concentración:
+
+```{r}
+ganadoresGR =dataGR14 %>% group_by(TXUBIGEOREGION,TXORGPOL) %>% summarise(votos = sum(VOTOS, na.rm = T))  %>% mutate(ganadorGR14 = TXORGPOL)
+```
+
+```{r}
+ganadoresGR = ganadoresGR [order(ganadoresGR$TXUBIGEOREGION, -ganadoresGR$votos),] 
 ```
 
 Votos ganador
 ```{r}
-primero = ganadoresGR %>% group_by(TXUBIGEOREGION) %>% filter(row_number()==1) %>% mutate(primeroGR14=VOTOS)
+primero = ganadoresGR %>% group_by(TXUBIGEOREGION) %>% filter(row_number()==1) %>% mutate(primeroGR14=votos)
 
-data_finalGR14 = left_join(data_finalGR14, primero[c(13,14)], by="TXUBIGEOREGION") #join 
+data_finalGR14 = left_join(data_finalGR14, primero[c(1,5)], by="TXUBIGEOREGION") #join 
 ```
 
 Votos segundo
-
 ```{r}
-segundo = ganadoresGR %>% group_by(TXUBIGEOREGION) %>% filter(row_number()==2) %>% mutate(segundoGR14=VOTOS)
+segundo = ganadoresGR %>% group_by(TXUBIGEOREGION) %>% filter(row_number()==2) %>% mutate(segundoGR14=votos)
 
-data_finalGR14 = left_join(data_finalGR14, segundo[c(13,14)], by="TXUBIGEOREGION") #join 
-```
-
-Nep:
-
-```{r}
-ganadoresGR = left_join(ganadoresGR, data_finalGR14[c(1,8)], by="TXUBIGEOREGION") #join 
-```
-
-Calcular proporción de votos validos 
-
-```{r}
-ganadoresGR$prop_votos2 = (ganadoresGR$VOTOS/ganadoresGR$validosGR14)^2
-```
-
-```{r}
-NEP = ganadoresGR %>% group_by(TXUBIGEOREGION) %>% 
-  summarise(NEPGR14 = 1/sum(prop_votos2, na.rm = T))
-
-data_finalGR14 = left_join(data_finalGR14, NEP, by="TXUBIGEOREGION") #join 
-```
-
-```{r}
-summary(data_finalGR14$NEPGR14)
+data_finalGR14 = left_join(data_finalGR14, segundo[c(1,5)], by="TXUBIGEOREGION") #join 
 ```
 
 Calculo concentración:
@@ -236,6 +237,39 @@ Calculo competitividad:
 ```{r}
 data_finalGR14 = data_finalGR14 %>% mutate(competitividadGR14 = primeroGR14/validosGR14 - segundoGR14/validosGR14)
 ```
+
+###### NEP Y Herfindahl
+
+Nep:
+
+- P= Proporción de votos válidos obtenidos por las organizacio- nes políticas en cada circunscripción.
+                          
+NEP = 1/ SUM(p^2)     
+
+Herfindahl: SUM(p^2)   
+
+Añadir votos validos a la tabla general:
+
+```{r}
+ganadoresGR = left_join(ganadoresGR, data_finalGR14[c(1,8)], by="TXUBIGEOREGION") #join 
+```
+
+Calcular proporción de votos validos 
+
+```{r}
+ganadoresGR$prop_votos2 = (ganadoresGR$votos/ganadoresGR$validosGR14)^2
+```
+
+NEP y Herfindahl por distrito:
+
+```{r}
+NEP = ganadoresGR %>% group_by(TXUBIGEOREGION) %>% 
+  summarise(NEPGR14 = 1/sum(prop_votos2, na.rm = T))
+
+data_finalGR14 = left_join(data_finalGR14, NEP, by="TXUBIGEOREGION") #join 
+```
+
+
 
 ##### GOBIERNO REGIONAL 2010
 
@@ -300,36 +334,7 @@ data_finalGR10 = data_finalGR10 %>%
          por_blancosnulosGR10 = (blancosnulosGR10/emitidosGR10)*100)
 ```
 
-
-ganadores
-
-```{r}
-ganadoresGR = dataGR10[order(dataGR10$UBIGEOREGION, -dataGR10$NUM_VOTOS_ORGPOL),] 
-```
-
-###### NEP 
-
-Añadir votos validos a la tabla general:
-
-```{r}
-ganadoresGR = left_join(ganadoresGR, data_finalGR10[c(1,6)], by="UBIGEOREGION") #join 
-```
-
-Calcular proporción de votos validos al cuadrado
-
-```{r}
-ganadoresGR$prop_votos2 = (ganadoresGR$NUM_VOTOS_ORGPOL/ganadoresGR$validosGR10)^2
-```
-
-NEP y Herfindahl por distrito:
-
-```{r}
-NEP = ganadoresGR %>% group_by(UBIGEOREGION) %>% 
-  summarise(NEPGR10 = 1/sum(prop_votos2, na.rm = T))
-
-data_finalGR10 = left_join(data_finalGR10, NEP, by="UBIGEOREGION") #join 
-```
-
+###Indicadores políticos 
 
 ###### Concentración:
 
@@ -361,10 +366,34 @@ Calculo concentración:
 data_finalGR10 = data_finalGR10 %>% mutate(concentracionGR10 = primeroGR10/validosGR10 + segundoGR10/validosGR10)
 ```
 
-Calculo competitividad:
+Calculo concentración:
 
 ```{r}
 data_finalGR10 = data_finalGR10 %>% mutate(competitividadGR10 = primeroGR10/validosGR10 - segundoGR10/validosGR10)
+
+```
+
+###### NEP Y Herfindahl
+
+Añadir votos validos a la tabla general:
+
+```{r}
+ganadoresGR = left_join(ganadoresGR, data_finalGR10[c(1,6)], by="UBIGEOREGION") #join 
+```
+
+Calcular proporción de votos validos al cuadrado
+
+```{r}
+ganadoresGR$prop_votos2 = (ganadoresGR$votos/ganadoresGR$validosGR10)^2
+```
+
+NEP y Herfindahl por distrito:
+
+```{r}
+NEP = ganadoresGR %>% group_by(UBIGEOREGION) %>% 
+  summarise(NEPGR10 = 1/sum(prop_votos2, na.rm = T))
+
+data_finalGR10 = left_join(data_finalGR10, NEP, by="UBIGEOREGION") #join 
 ```
 
 ##### GOBIERNO REGIONAL 2006
@@ -432,49 +461,6 @@ data_finalGR06 = data_finalGR06 %>%
          por_blancosnulosGR06 = (blancosnulosGR06/emitidosGR06)*100)
 ```
 
-###Ganadores GR
-
-Eliminar:
-
-```{r}
-dataGR06= dataGR06[!dataGR06$TIPOORGPOL == "VOTOS EN BLANCO",]
-dataGR06= dataGR06[!dataGR06$TIPOORGPOL == "VOTOS NULOS",]
-```
-
-Ordenar tabla en según votos
-
-```{r}
-ganadoresGR<- dataGR06[order(dataGR06$UBIGEO, -dataGR06$NUM_VOTOS_ORGPOL),] 
-```
-
-
-###### NEP Y Herfindahl
-
-Calcular proporción de votos validos al cuadrado
-
-Añadir votos validos a la tabla general:
-
-```{r}
-ganadoresGR = left_join(ganadoresGR, data_finalGR06[c(1,6)], by="UBIGEOREGION") #join 
-```
-
-Calcular proporción de votos validos al cuadrado
-
-```{r}
-ganadoresGR$prop_votos2 = (ganadoresGR$NUM_VOTOS_ORGPOL/ganadoresGR$validosGR06)^2
-```
-
-
-NEP y Herfindahl por distrito:
-
-```{r}
-NEP = ganadoresGR %>% group_by(UBIGEOREGION) %>% 
-  summarise(NEPGR06 = 1/sum(prop_votos2, na.rm = T))
-
-data_finalGR06 = left_join(data_finalGR06, NEP, by="UBIGEOREGION") #join 
-```
-
-
 ###Indicadores políticos 
 
 ###### Concentración:
@@ -507,10 +493,38 @@ Calculo concentración:
 data_finalGR06 = data_finalGR06 %>% mutate(concentracionGR06 = primeroGR06/validosGR06 + segundoGR06/validosGR06)
 ```
 
-Calculo competitividad
+Calculo competitividad:
 
 ```{r}
 data_finalGR06 = data_finalGR06 %>% mutate(competitividadGR06 = primeroGR06/validosGR06 - segundoGR06/validosGR06)
+
+```
+
+
+###### NEP Y Herfindahl
+
+Calcular proporción de votos validos al cuadrado
+
+Añadir votos validos a la tabla general:
+
+```{r}
+ganadoresGR = left_join(ganadoresGR, data_finalGR06[c(1,6)], by="UBIGEOREGION") #join 
+```
+
+Calcular proporción de votos validos al cuadrado
+
+```{r}
+ganadoresGR$prop_votos2 = (ganadoresGR$votos/ganadoresGR$validosGR06)^2
+```
+
+
+NEP y Herfindahl por distrito:
+
+```{r}
+NEP = ganadoresGR %>% group_by(UBIGEOREGION) %>% 
+  summarise(NEPGR06 = 1/sum(prop_votos2, na.rm = T))
+
+data_finalGR06 = left_join(data_finalGR06, NEP, by="UBIGEOREGION") #join 
 ```
 
 ##### GOBIERNO REGIONAL 2002
@@ -575,8 +589,9 @@ data_finalGR02 = data_finalGR02 %>%
          por_blancosnulosGR02 = (blancosnulosGR02/emitidosGR02)*100)
 ```
 
+###Indicadores políticos 
 
-###Ganadores GR
+###### Concentración:
 
 Votos ganador
 
@@ -601,6 +616,17 @@ segundo = ganadoresGR %>% group_by(UBIGEOREGION) %>% filter(row_number()==2) %>%
 data_finalGR02 = left_join(data_finalGR02, segundo[c(1,5)], by="UBIGEOREGION") #join 
 ```
 
+Calculo concentración:
+
+```{r}
+data_finalGR02 = data_finalGR02 %>% mutate(concentracionGR02 = primeroGR02/validosGR02 + segundoGR02/validosGR02)
+```
+
+Calculo competitividad
+
+```{r}
+data_finalGR02 = data_finalGR02 %>% mutate(competitividadGR02 = primeroGR02/validosGR02 - segundoGR02/validosGR02)
+```
 
 ###### NEP Y Herfindahl
 
@@ -622,21 +648,9 @@ NEP y Herfindahl por distrito:
 
 ```{r}
 NEP = ganadoresGR %>% group_by(UBIGEOREGION) %>% 
-  summarise(NEPGR02 = 1/sum(prop_votos2, na.rm = T))
+  summarise( NEPGR02 = 1/sum(prop_votos2, na.rm = T))
 
 data_finalGR02 = left_join(data_finalGR02, NEP, by="UBIGEOREGION") #join 
-```
-
-Calculo concentración:
-
-```{r}
-data_finalGR02 = data_finalGR02 %>% mutate(concentracionGR02 = primeroGR02/validosGR02 + segundoGR02/validosGR02)
-```
-
-Calculo competitividad:
-
-```{r}
-data_finalGR02 = data_finalGR02 %>% mutate(competitividadGR02 = primeroGR02/validosGR02 - segundoGR02/validosGR02)
 ```
 
 ###### MERGE TOTAL
@@ -677,3 +691,7 @@ data_regional = full_join(data_regional, data_finalGR02, by = c("TXUBIGEOREGION"
 ```{r}
 save(data_regional, file = "data_regional.rda")
 ```
+
+
+
+
