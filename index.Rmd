@@ -87,7 +87,7 @@ v_sd <- round(as.numeric(v_sd), 2)
 v_min <- round(as.numeric(v_min), 2)
 v_max <- round(as.numeric(v_max), 2)
 
-v_tab <- cbind(media=v_mean, mediana=v_mean,sd=v_sd,min=v_min, max=v_max)
+v_tab <- cbind(media=v_mean, mediana=v_median,sd=v_sd,min=v_min, max=v_max)
 row.names(v_tab) = c("2002", "2006", "2010", "2014", "2018")
 
 v_tab=as.data.frame(t(v_tab))
@@ -186,7 +186,7 @@ legend("center",title='NEP',
 
 #### Competitividad Electoral
 
-**Estadisticos descriptivos: Indicador de Fragmentación Electoral (competitividad) en las Elecciones Regionales**
+**Estadisticos descriptivos: Indicador de Competitividad en las Elecciones Regionales**
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 vars=c("competitividadGR02",  "competitividadGR06", "competitividadGR10", "competitividadGR14", "competitividadGR18")
@@ -203,7 +203,7 @@ v_sd <- round(as.numeric(v_sd), 2)
 v_min <- round(as.numeric(v_min), 2)
 v_max <- round(as.numeric(v_max), 2)
 
-v_tab <- cbind(media=v_mean, mediana=v_mean,sd=v_sd,min=v_min, max=v_max)
+v_tab <- cbind(media=v_mean, mediana=v_median,sd=v_sd,min=v_min, max=v_max)
 row.names(v_tab) = c("2002", "2006", "2010", "2014", "2018")
 
 v_tab=as.data.frame(t(v_tab))
@@ -317,7 +317,7 @@ v_sd <- round(as.numeric(v_sd), 2)
 v_min <- round(as.numeric(v_min), 2)
 v_max <- round(as.numeric(v_max), 2)
 
-v_tab <- cbind(media=v_mean, mediana=v_mean,sd=v_sd,min=v_min, max=v_max)
+v_tab <- cbind(media=v_mean, mediana=v_median,sd=v_sd,min=v_min, max=v_max)
 row.names(v_tab) = c("2002", "2006", "2010", "2014", "2018")
 
 v_tab=as.data.frame(t(v_tab))
@@ -438,7 +438,7 @@ v_sd <- round(as.numeric(v_sd), 2)
 v_min <- round(as.numeric(v_min), 2)
 v_max <- round(as.numeric(v_max), 2)
 
-v_tab <- cbind(media=v_mean, mediana=v_mean,sd=v_sd,min=v_min, max=v_max)
+v_tab <- cbind(media=v_mean, mediana=v_median,sd=v_sd,min=v_min, max=v_max)
 row.names(v_tab) = c("2002", "2006", "2010", "2014", "2018")
 
 v_tab=as.data.frame(t(v_tab))
@@ -537,7 +537,7 @@ legend("center",title='NEP',
 
 #### Competitividad Electoral
 
-**Estadisticos descriptivos: Indicador de Fragmentación Electoral (competitividad) en las Elecciones Provinciales**
+**Estadisticos descriptivos: Indicador de Competitividad en las Elecciones Provinciales**
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 vars=c("competitividadGP02",  "competitividadGP06", "competitividadGP10", "competitividadGP14", "competitividadGP18")
@@ -554,7 +554,7 @@ v_sd <- round(as.numeric(v_sd), 2)
 v_min <- round(as.numeric(v_min), 2)
 v_max <- round(as.numeric(v_max), 2)
 
-v_tab <- cbind(media=v_mean, mediana=v_mean,sd=v_sd,min=v_min, max=v_max)
+v_tab <- cbind(media=v_mean, mediana=v_median,sd=v_sd,min=v_min, max=v_max)
 row.names(v_tab) = c("2002", "2006", "2010", "2014", "2018")
 
 v_tab=as.data.frame(t(v_tab))
@@ -668,7 +668,7 @@ v_sd <- round(as.numeric(v_sd), 2)
 v_min <- round(as.numeric(v_min), 2)
 v_max <- round(as.numeric(v_max), 2)
 
-v_tab <- cbind(media=v_mean, mediana=v_mean,sd=v_sd,min=v_min, max=v_max)
+v_tab <- cbind(media=v_mean, mediana=v_median,sd=v_sd,min=v_min, max=v_max)
 row.names(v_tab) = c("2002", "2006", "2010", "2014", "2018")
 
 v_tab=as.data.frame(t(v_tab))
