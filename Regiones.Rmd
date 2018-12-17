@@ -60,7 +60,12 @@ data_finalGR18  = data_finalGR18 %>%
 ###### Concentración:
 
 ```{r}
-ganadoresGR =dataGR18 %>% group_by(ID,NOMBRE_ORGANIZACION) %>% summarise(votos = sum(as.numeric(VOTOSORG_TOTAL), na.rm = T))  %>% mutate(ganadorGR18 = NOMBRE_ORGANIZACION)
+dataGR182 = dataGR18[!dataGR18$NOMBRE_ORGANIZACION == "VOTOS EN BLANCO",]
+dataGP182 = dataGR182[!dataGR182$NOMBRE_ORGANIZACION == "VOTOS NULOS",]
+```
+
+```{r}
+ganadoresGR =dataGR182 %>% group_by(ID,NOMBRE_ORGANIZACION) %>% summarise(votos = sum(as.numeric(VOTOSORG_TOTAL), na.rm = T))  %>% mutate(ganadorGR18 = NOMBRE_ORGANIZACION)
 ```
 
 ```{r}
@@ -191,7 +196,7 @@ Eliminar votos blancos y nulos:
 
 ```{r}
 dataGR14= dataGR14[!dataGR14$TIPOORGPOL == "VOTOS EN BLANCO",]
-dataGR14= dataGR14[!dataGR14$TIPOORGPOL == "VOTOS NULOS",]
+dataGR14= dataGR14[!dataGR142$TIPOORGPOL == "VOTOS NULOS",]
 ```
 
 Ordenar tabla según votos
@@ -339,7 +344,12 @@ data_finalGR10 = data_finalGR10 %>%
 ###### Concentración:
 
 ```{r}
-ganadoresGR =dataGR10 %>% group_by(UBIGEOREGION,NOM_ORGPOLITICA) %>% summarise(votos = sum(NUM_VOTOS_ORGPOL, na.rm = T))  %>% mutate(ganadorGR10 = NOM_ORGPOLITICA)
+dataGR102 = dataGR10[!dataGR10$NOM_ORGPOLITICA == "VOTOS EN BLANCO",]
+dataGP102 = dataGR102[!dataGR102$NOM_ORGPOLITICA == "VOTOS NULOS",]
+```
+
+```{r}
+ganadoresGR =dataGR102 %>% group_by(UBIGEOREGION,NOM_ORGPOLITICA) %>% summarise(votos = sum(NUM_VOTOS_ORGPOL, na.rm = T))  %>% mutate(ganadorGR10 = NOM_ORGPOLITICA)
 ```
 
 ```{r}
@@ -466,7 +476,12 @@ data_finalGR06 = data_finalGR06 %>%
 ###### Concentración:
 
 ```{r}
-ganadoresGR =dataGR06 %>% group_by(UBIGEOREGION,NOM_ORGPOLITICA) %>% summarise(votos = sum(NUM_VOTOS_ORGPOL, na.rm = T))  %>% mutate(ganadorGR06 = NOM_ORGPOLITICA)
+dataGR062 = dataGR06[!dataGR06$NOM_ORGPOLITICA == "VOTOS EN BLANCO",]
+dataGP062 = dataGR062[!dataGR062$NOM_ORGPOLITICA == "VOTOS NULOS",]
+```
+
+```{r}
+ganadoresGR =dataGR062 %>% group_by(UBIGEOREGION,NOM_ORGPOLITICA) %>% summarise(votos = sum(NUM_VOTOS_ORGPOL, na.rm = T))  %>% mutate(ganadorGR06 = NOM_ORGPOLITICA)
 ```
 
 ```{r}
@@ -592,6 +607,11 @@ data_finalGR02 = data_finalGR02 %>%
 ###Indicadores políticos 
 
 ###### Concentración:
+
+```{r}
+dataGR022 = dataGR02[!dataGR02$NOM_ORGPOLITICA == "VOTOS EN BLANCO",]
+dataGP022 = dataGR022[!dataGR022$NOM_ORGPOLITICA == "VOTOS NULOS",]
+```
 
 Votos ganador
 

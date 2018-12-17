@@ -1,0 +1,518 @@
+```{r}
+library(readxl)
+library(tidyverse)
+```
+
+## 2018
+
+```{r}
+dataGL18=read_xlsx("TablaDistrital2018.xlsx")
+```
+
+```{r}
+electores = dataGL18 %>% 
+            group_by(TXUBIGEO) %>% #seleccionar una fila por distrito
+           summarise(electoresGL18 = max(ELECTORES, na.rm = T)) 
+```
+
+Votos emitidos por distritos:
+
+```{r}
+emitidos = dataGL18 %>% 
+            group_by(TXUBIGEO) %>% #seleccionar una fila por distrito
+           summarise(emitidosGL18 = sum(VOTOS))
+data_finalGL18 = left_join(electores, emitidos, by="TXUBIGEO")
+```
+
+Calcular ausentes: 
+
+```{r}
+data_finalGL18 = data_finalGL18 %>% 
+  mutate(ausentesGL18 = electoresGL18 - emitidosGL18, 
+         por_ausentesGL18 = (ausentesGL18/electoresGL18)*100)
+```
+
+Votos blancos + nulos
+
+```{r}
+blancos_nulos = dataGL18 %>% filter(TXORGPOL == "VOTOS EN BLANCO" | TXORGPOL =="VOTOS NULOS" ) %>%
+                group_by(TXUBIGEO) %>% 
+                summarise(blancosnulosGL18 = sum(VOTOS, na.rm = T)) 
+
+data_finalGL18 = left_join(data_finalGL18, blancos_nulos, by="TXUBIGEO") #join
+
+data_finalGL18  = data_finalGL18 %>% 
+          mutate (por_blancosnulosGL18 = (blancosnulosGL18/emitidosGL18)*100) 
+```
+
+votos validos:
+
+```{r}
+data_finalGL18  = data_finalGL18 %>% 
+          mutate (validosGL18 = emitidosGL18-blancosnulosGL18) 
+```
+
+```{r}
+#cuidar casos sin votos validos
+data_finalGL18[data_finalGL18$validosGL18==0,]$por_blancosnulosGL18 = NA 
+data_finalGL18[data_finalGL18$validosGL18==0,]$por_ausentesGL18 = NA 
+
+```
+
+
+###Indicadores políticos 
+
+###### Concentración:
+
+```{r}
+dataGL182 = dataGL18[!dataGL18$TXORGPOL == "VOTOS NULOS",]
+```
+
+```{r}
+dataGL182 = dataGL182[!dataGL182$TXORGPOL == "VOTOS EN BLANCO",]
+```
+
+
+```{r}
+ganadoresGL =dataGL182 %>% group_by(TXUBIGEO,TXORGPOL) %>% summarise(votos = sum(VOTOS, na.rm = T))  %>% mutate(ganadorGL18 = TXORGPOL)
+```
+
+```{r}
+ganadoresGL = ganadoresGL [order(ganadoresGL$TXUBIGEO, -ganadoresGL$votos),] 
+```
+
+
+Votos ganador
+```{r}
+primero = ganadoresGL %>% group_by(TXUBIGEO) %>% filter(row_number()==1) %>% mutate(primeroGL18=votos)
+
+data_finalGL18 = left_join(data_finalGL18, primero[c(1,5)], by="TXUBIGEO") #join 
+```
+
+Votos segundo
+```{r}
+segundo = ganadoresGL %>% group_by(TXUBIGEO) %>% filter(row_number()==2) %>% mutate(segundoGL18=votos)
+
+data_finalGL18 = left_join(data_finalGL18, segundo[c(1,5)], by="TXUBIGEO") #join 
+```
+
+
+Calculo concentración:
+
+```{r}
+data_finalGL18 = data_finalGL18 %>% mutate(concentracionGL18 = primeroGL18/validosGL18 + segundoGL18/validosGL18)
+```
+
+Calculo competitividad:
+
+```{r}
+data_finalGL18 = data_finalGL18 %>% mutate(competitividadGL18 = primeroGL18/validosGL18 - segundoGL18/validosGL18)
+```
+
+###### NEP Y Herfindahl
+
+```{r}
+ganadoresGL = left_join(ganadoresGL, data_finalGL18[c(1,8)], by="TXUBIGEO") #join 
+```
+
+Calcular proporción de votos validos 
+
+```{r}
+ganadoresGL$prop_votos2 = (ganadoresGL$votos/ganadoresGL$validosGL18)^2
+```
+
+NEP y Herfindahl por distrito:
+
+```{r}
+NEP = ganadoresGL %>% group_by(TXUBIGEO) %>% 
+  summarise(NEPGL18 = 1/sum(prop_votos2, na.rm = T))
+
+data_finalGL18 = left_join(data_finalGL18, NEP, by="TXUBIGEO") #join 
+```
+
+
+## 2014
+
+```{r}
+dataGL14=read_xlsx("TablaDistrital2014.xlsx")
+```
+
+```{r}
+electores = dataGL14 %>% 
+            group_by(TXUBIGEO) %>% #seleccionar una fila por distrito
+           summarise(electoresGL14 = max(ELECTORES, na.rm = T)) 
+```
+
+Votos emitidos por distritos:
+
+```{r}
+emitidos = dataGL14 %>% group_by(TXUBIGEO) %>% 
+           summarise(emitidosGL14 = sum(VOTOS, na.rm = T))
+
+data_finalGL14 = left_join(electores, emitidos, by="TXUBIGEO") #join
+
+#ciudar que los que tienen 0 en votos emitidos sean NA
+data_finalGL14[data_finalGL14$emitidosGL14==0,]$emitidosGL14 = NA
+```
+
+
+Calcular ausentes: 
+
+```{r}
+data_finalGL14 = data_finalGL14 %>% 
+  mutate(ausentesGL14= electoresGL14 - emitidosGL14, 
+         por_ausentesGL14 = (ausentesGL14/electoresGL14)*100)
+```
+
+Votos blancos + nulos
+
+```{r}
+blancos_nulos = dataGL14 %>% filter(TXORGPOL == "VOTOS EN BLANCO" | TXORGPOL =="VOTOS NULOS" ) %>% group_by(TXUBIGEO) %>% 
+                summarise(blancosnulosGL14 = sum(VOTOS, na.rm = T)) 
+
+data_finalGL14 = left_join(data_finalGL14, blancos_nulos, by="TXUBIGEO") #join
+
+data_finalGL14  = data_finalGL14 %>% 
+          mutate (por_blancosnulosGL14 = (blancosnulosGL14/emitidosGL14)*100) 
+```
+
+votos validos:
+
+```{r}
+data_finalGL14  = data_finalGL14 %>% 
+          mutate (validosGL14 = emitidosGL14-blancosnulosGL14) 
+```
+
+```{r}
+#cuidar casos sin votos validos
+data_finalGL14[!is.na(data_finalGL14$validosGL14) &data_finalGL14$validosGL14==0,]$por_ausentesGL14 = NA 
+
+data_finalGL14[!is.na(data_finalGL14$validosGL14) &data_finalGL14$validosGL14==0,]$por_blancosnulosGL14 = NA 
+```
+
+
+###Indicadores políticos 
+
+###### Concentración:
+
+Votos ganador
+
+```{r}
+dataGL142 = dataGL14[!dataGL14$TXORGPOL == "VOTOS EN BLANCO",]
+dataGL142 = dataGL142[!dataGL142$TXORGPOL == "VOTOS NULOS",]
+```
+
+```{r}
+ganadoresGL =dataGL142 %>% group_by(TXUBIGEO,TXORGPOL) %>% summarise(votos = sum(VOTOS, na.rm = T))  %>% mutate(ganadorGL14 = TXORGPOL)
+```
+
+```{r}
+ganadoresGL = ganadoresGL[order(ganadoresGL$TXUBIGEO,-ganadoresGL$votos),]
+```
+
+Votos ganador
+```{r}
+primero = ganadoresGL %>% group_by(TXUBIGEO) %>% filter(row_number()==1) %>% mutate(primeroGL14=votos)
+
+data_finalGL14 = left_join(data_finalGL14, primero[c(1,5)], by="TXUBIGEO") #join 
+```
+
+Votos segundo
+```{r}
+segundo = ganadoresGL %>% group_by(TXUBIGEO) %>% filter(row_number()==2) %>% mutate(segundoGL14=votos)
+
+data_finalGL14 = left_join(data_finalGL14, segundo[c(1,5)], by="TXUBIGEO") #join 
+```
+
+
+Calculo concentración:
+
+```{r}
+data_finalGL14 = data_finalGL14 %>% mutate(concentracionGL14 = primeroGL14/validosGL14 + segundoGL14/validosGL14)
+```
+
+Calculo competitividad:
+
+```{r}
+data_finalGL14 = data_finalGL14 %>% mutate(competitividadGL14 = primeroGL14/validosGL14 - segundoGL14/validosGL14)
+```
+
+
+###### NEP Y Herfindahl
+
+Nep:
+
+```{r}
+ganadoresGL = left_join(ganadoresGL, data_finalGL14[c(1,8)], by="TXUBIGEO") #join 
+```
+
+Calcular proporción de votos validos al cuadrado
+
+```{r}
+ganadoresGL$prop_votos2 = (ganadoresGL$votos/ganadoresGL$validosGL14)^2
+```
+
+NEP:
+```{r}
+NEP = ganadoresGL %>% group_by(TXUBIGEO) %>% 
+  summarise(NEPGL14 = 1/sum(prop_votos2, na.rm = T))
+
+data_finalGL14 = left_join(data_finalGL14, NEP, by="TXUBIGEO") #join 
+
+#cuidar casos sin votos validos
+data_finalGL14[!is.na(data_finalGL14$validosGL14) &data_finalGL14$validosGL14==0,]$NEPGL14 = NA 
+```
+
+## 2010
+
+```{r}
+dataGL10=read_xlsx("TablaDistrital2010.xlsx")
+```
+
+```{r}
+electores = dataGL10 %>% 
+            group_by(UBIGEO) %>% #seleccionar una fila por distrito
+           summarise(electoresGL10 = sum(max(NUMAUSENTES) + max(NUM_VOTOS_EMITIDOS), na.rm = T)) 
+```
+
+
+Votos emitidos por distritos:
+
+```{r}
+emitidos = dataGL10 %>% group_by(UBIGEO) %>% 
+           summarise(emitidosGL10 = max(NUM_VOTOS_EMITIDOS, na.rm = T)) 
+
+data_finalGL10 = left_join(electores, emitidos, by="UBIGEO") #join
+```
+
+
+Calcular ausentes: 
+
+```{r}
+data_finalGL10 = data_finalGL10 %>% 
+  mutate(ausentesGL10= electoresGL10 - emitidosGL10, 
+         por_ausentesGL10 = (ausentesGL10/electoresGL10)*100)
+```
+
+votos validos:
+
+```{r}
+validos = dataGL10 %>% 
+            group_by(UBIGEO) %>% #seleccionar una fila por distrito
+           summarise(validosGL10 = sum(NUM_VOTOS_ORGPOL, na.rm = T)) 
+
+data_finalGL10 = left_join(data_finalGL10, validos, by="UBIGEO") #join
+
+#Ojo, tengo casos con 0 votos validos.. estoy asumiento que esos son blancos y nulos
+```
+
+Votos blancos + nulos
+
+```{r}
+data_finalGL10 = data_finalGL10 %>% 
+  mutate(blancosnulosGL10 = emitidosGL10 - validosGL10, 
+         por_blancosnulosGL10 = (blancosnulosGL10/emitidosGL10)*100)
+```
+
+```{r}
+#cuidar casos sin votos validos
+data_finalGL10[!is.na(data_finalGL10$validosGL10) &data_finalGL10$validosGL10==0,]$por_ausentesGL10 = NA 
+
+data_finalGL10[!is.na(data_finalGL10$validosGL10) &data_finalGL10$validosGL10==0,]$por_blancosnulosGL10 = NA 
+```
+
+
+```{r}
+dataGL102 = dataGL10[!dataGL10$NOM_ORGPOLITICA == "VOTOS EN BLANCO",]
+dataGL102 = dataGL102[!dataGL102$NOM_ORGPOLITICA == "VOTOS NULOS",]
+```
+
+```{r}
+ganadoresGL =dataGL102 %>% group_by(UBIGEO,NOM_ORGPOLITICA) %>% summarise(votos = sum(NUM_VOTOS_ORGPOL, na.rm = T))  %>% mutate(ganadorGL10 = NOM_ORGPOLITICA)
+```
+
+```{r}
+ganadoresGL = ganadoresGL[order(ganadoresGL$UBIGEO,-ganadoresGL$votos),]
+```
+
+
+Votos ganador
+```{r}
+primero = ganadoresGL %>% group_by(UBIGEO) %>% filter(row_number()==1) %>% mutate(primeroGL10=votos)
+
+data_finalGL10 = left_join(data_finalGL10, primero[c(1,5)], by="UBIGEO") #join 
+```
+
+Votos segundo
+```{r}
+segundo = ganadoresGL %>% group_by(UBIGEO) %>% filter(row_number()==2) %>% mutate(segundoGL10=votos)
+
+data_finalGL10 = left_join(data_finalGL10, segundo[c(1,5)], by="UBIGEO") #join 
+```
+
+
+Calculo concentración:
+
+```{r}
+data_finalGL10 = data_finalGL10 %>% mutate(concentracionGL10 = primeroGL10/validosGL10 + segundoGL10/validosGL10)
+
+#cuidar casos sin votos validos
+data_finalGL10$concentracionGL10[is.nan(data_finalGL10$concentracionGL10)] = NA 
+```
+
+Calculo competitividad:
+
+```{r}
+data_finalGL10 = data_finalGL10 %>% mutate(competitividadGL10 = primeroGL10/validosGL10 - segundoGL10/validosGL10)
+
+#cuidar casos sin votos validos
+data_finalGL10$competitividadGL10[is.nan(data_finalGL10$competitividadGL10)] = NA 
+```
+
+###### NEP Y Herfindahl
+
+Calcular proporción de votos validos al cuadrado
+
+```{r}
+dataGL10$prop_votos2 = (dataGL10$NUM_VOTOS_ORGPOL/dataGL10$NUM_VOTOS_VAL)^2
+```
+
+NEP y Herfindahl por distrito:
+
+```{r}
+NEP = dataGL10 %>% group_by(UBIGEO) %>% 
+  summarise(NEPGL10 = 1/sum(prop_votos2, na.rm = T))
+
+data_finalGL10 = left_join(data_finalGL10, NEP, by="UBIGEO") #join 
+
+#cuidar casos sin votos validos
+data_finalGL10$NEPGL10[is.infinite(data_finalGL10$NEPGL10)] = NA 
+```
+
+## 2006
+
+```{r}
+dataGL06=read_xlsx("TablaDistrital2006.xlsx")
+```
+
+```{r}
+electores = dataGL06 %>% 
+            group_by(Ubigeo) %>% #seleccionar una fila por distrito
+           summarise(electoresGL06 = max(Electores)) 
+```
+
+Votos emitidos por distritos:
+
+```{r}
+emitidos = dataGL06 %>% group_by(Ubigeo) %>% 
+           summarise(emitidosGL06 = sum(Votos)) 
+
+data_finalGL06 = left_join(electores, emitidos, by="Ubigeo") #join
+```
+
+Calcular ausentes: 
+
+```{r}
+data_finalGL06 = data_finalGL06 %>% 
+  mutate(ausentesGL06= electoresGL06 - emitidosGL06, 
+         por_ausentesGL06 = (ausentesGL06/electoresGL06)*100)
+```
+
+votos validos:
+
+```{r}
+validos = dataGL06 %>% 
+            group_by(Ubigeo) %>% #seleccionar una fila por distrito
+           summarise(validosGL06 = max(`Votos vAlidos`, na.rm = T)) 
+
+data_finalGL06 = left_join(data_finalGL06, validos, by="Ubigeo") #join
+
+#Ojo, tengo casos con 0 votos validos.. estoy asumiento que esos son blancos y nulos
+```
+
+Votos blancos + nulos
+
+```{r}
+data_finalGL06 = data_finalGL06 %>% 
+  mutate(blancosnulosGL06 = emitidosGL06 - validosGL06, 
+         por_blancosnulosGL06 = (blancosnulosGL06/emitidosGL06)*100)
+```
+
+```{r}
+#cuidar casos sin votos validos
+data_finalGL06[!is.na(data_finalGL06$validosGL06) &data_finalGL06$validosGL06==0,]$por_ausentesGL06 = NA 
+
+data_finalGL06[!is.na(data_finalGL06$validosGL06) &data_finalGL06$validosGL06==0,]$por_blancosnulosGL06 = NA 
+```
+
+
+```{r}
+dataGL062 = dataGL06[!dataGL06$`OrganizaciOn PolItica` == "VOTOS EN BLANCO",]
+dataGL062 = dataGL062[!dataGL062$`OrganizaciOn PolItica` == "VOTOS NULOS",]
+```
+
+```{r}
+ganadoresGL =dataGL062 %>% group_by(Ubigeo, `OrganizaciOn PolItica`) %>% summarise(votos = sum(Votos, na.rm = T))  %>% mutate(ganadorGL06 = `OrganizaciOn PolItica`)
+```
+
+```{r}
+ganadoresGL = ganadoresGL[order(ganadoresGL$Ubigeo,-ganadoresGL$votos),]
+```
+
+Votos ganador
+```{r}
+primero = ganadoresGL %>% group_by(Ubigeo) %>% filter(row_number()==1) %>% mutate(primeroGL06=votos)
+
+data_finalGL06 = left_join(data_finalGL06, primero[c(1,5)], by="Ubigeo") #join 
+```
+
+Votos segundo
+```{r}
+segundo = ganadoresGL %>% group_by(Ubigeo) %>% filter(row_number()==2) %>% mutate(segundoGL06=votos)
+
+data_finalGL06 = left_join(data_finalGL06, segundo[c(1,5)], by="Ubigeo") #join 
+```
+
+Calculo concentración:
+
+```{r}
+data_finalGL06 = data_finalGL06 %>% mutate(concentracionGL06 = primeroGL06/validosGL06 + segundoGL06/validosGL06)
+
+#cuidar casos sin votos validos
+data_finalGL06$concentracionGL06[is.nan(data_finalGL06$concentracionGL06)] = NA 
+```
+
+Calculo competitividad:
+
+```{r}
+data_finalGL06 = data_finalGL06 %>% mutate(competitividadGL06 = primeroGL06/validosGL06 - segundoGL06/validosGL06)
+
+#cuidar casos sin votos validos
+data_finalGL06$competitividadGL06[is.nan(data_finalGL06$competitividadGL06)] = NA 
+```
+
+
+###### NEP Y Herfindahl
+
+Nep:
+
+```{r}
+ganadoresGL = left_join(ganadoresGL, data_finalGL06[c(1,6)], by="Ubigeo") #join 
+```
+
+Calcular proporción de votos validos al cuadrado
+
+```{r}
+ganadoresGL$prop_votos2 = (ganadoresGL$votos/ganadoresGL$validosGL06)^2
+```
+
+NEP:
+```{r}
+NEP = ganadoresGL %>% group_by(Ubigeo) %>% 
+  summarise(NEPGL06 = 1/sum(prop_votos2, na.rm = T))
+
+data_finalGL06 = left_join(data_finalGL06, NEP, by="Ubigeo") #join 
+
+#cuidar casos sin votos validos
+data_finalGL06[!is.na(data_finalGL06$validosGL06) &data_finalGL06$validosGL06==0,]$NEPGL06 = NA 
+```

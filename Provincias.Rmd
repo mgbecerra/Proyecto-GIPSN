@@ -1,4 +1,5 @@
 ```{r}
+library(openxlsx)
 library(readxl)
 library(tidyverse)
 ```
@@ -54,13 +55,17 @@ data_finalGP18  = data_finalGP18 %>%
           mutate (validosGP18 = emitidosGP18-blancosnulosGP18) 
 ```
 
-
 ###Indicadores políticos 
 
 ###### Concentración:
 
 ```{r}
-ganadoresGP =dataGP18 %>% group_by(ID,NOMBRE_ORGANIZACION) %>% summarise(votos = sum(as.numeric(VOTOSORG_TOTAL), na.rm = T))  %>% mutate(ganadorGP18 = NOMBRE_ORGANIZACION)
+dataGP182 = dataGP18[!dataGP18$NOMBRE_ORGANIZACION == "VOTOS EN BLANCO",]
+dataGP182 = dataGP182[!dataGP182$NOMBRE_ORGANIZACION == "VOTOS NULOS",]
+```
+
+```{r}
+ganadoresGP = dataGP182 %>%  group_by(ID,NOMBRE_ORGANIZACION) %>% summarise(votos = sum(as.numeric(VOTOSORG_TOTAL), na.rm = T))  %>% mutate(ganadorGP18 = NOMBRE_ORGANIZACION)
 ```
 
 ```{r}
@@ -123,7 +128,6 @@ data_finalGP18 = left_join(data_finalGP18, NEP, by="ID") #join
 dataGP14=read_xlsx("TablaProvincial2014.xlsx")
 ```
 
-
 ```{r}
 #Ubigeo provincia: 
 dataGP14$TXUBIGEOPROVINCIA=dataGP14$TXUBIGEO
@@ -172,6 +176,7 @@ data_finalGP14 = left_join(data_finalGP14, blancos_nulos, by="TXUBIGEOPROVINCIA"
 
 data_finalGP14  = data_finalGP14 %>% 
           mutate (por_blancosnulosGP14 = (blancosnulosGP14/emitidosGP14)*100) 
+
 ```
 
 votos validos:
@@ -179,6 +184,10 @@ votos validos:
 ```{r}
 data_finalGP14  = data_finalGP14 %>% 
           mutate (validosGP14 = emitidosGP14-blancosnulosGP14) 
+
+#cuidar casos sin votos validos
+data_finalGP14[data_finalGP14$validosGP14==0,]$por_blancosnulosGP14 = NA 
+data_finalGP14[data_finalGP14$validosGP14==0,]$por_ausentesGP14 = NA 
 ```
 
 ###Indicadores políticos 
@@ -188,7 +197,12 @@ data_finalGP14  = data_finalGP14 %>%
 Votos ganador
 
 ```{r}
-ganadoresGP =dataGP14 %>% group_by(TXUBIGEOPROVINCIA,TXORGPOL) %>% summarise(votos = sum(VOTOS, na.rm = T))  %>% mutate(ganadorGP14 = TXORGPOL)
+dataGP142 = dataGP14[!dataGP14$TXORGPOL == "VOTOS EN BLANCO",]
+dataGP142 = dataGP142[!dataGP142$TXORGPOL == "VOTOS NULOS",]
+```
+
+```{r}
+ganadoresGP =dataGP142 %>% group_by(TXUBIGEOPROVINCIA,TXORGPOL) %>% summarise(votos = sum(VOTOS, na.rm = T))  %>% mutate(ganadorGP14 = TXORGPOL)
 ```
 
 ```{r}
@@ -311,8 +325,14 @@ data_finalGP10 = data_finalGP10 %>%
 
 ###### Concentración:
 
+
 ```{r}
-ganadoresGP =dataGP10 %>% group_by(UBIGEOPROVINCIA,NOM_ORGPOLITICA) %>% summarise(votos = sum(NUM_VOTOS_ORGPOL, na.rm = T))  %>% mutate(ganadorGP10 = NOM_ORGPOLITICA)
+dataGP102 = dataGP10[!dataGP10$NOM_ORGPOLITICA == "VOTOS EN BLANCO",]
+dataGP102 = dataGP102[!dataGP102$NOM_ORGPOLITICA == "VOTOS NULOS",]
+```
+
+```{r}
+ganadoresGP =dataGP102 %>% group_by(UBIGEOPROVINCIA,NOM_ORGPOLITICA) %>% summarise(votos = sum(NUM_VOTOS_ORGPOL, na.rm = T))  %>% mutate(ganadorGP10 = NOM_ORGPOLITICA)
 ```
 
 ```{r}
@@ -428,7 +448,12 @@ data_finalGP06 = data_finalGP06 %>%
 ###### Concentración:
 
 ```{r}
-ganadoresGP =dataGP06 %>% group_by(UBIGEOPROVINCIA,NOM_ORGPOLITICA) %>% summarise(votos = sum(NUM_VOTOS_ORGPOL, na.rm = T))  %>% mutate(ganadorGP06 = NOM_ORGPOLITICA)
+dataGP062 = dataGP06[!dataGP06$NOM_ORGPOLITICA == "VOTOS EN BLANCO",]
+dataGP062 = dataGP062[!dataGP062$NOM_ORGPOLITICA == "VOTOS NULOS",]
+```
+
+```{r}
+ganadoresGP =dataGP062 %>% group_by(UBIGEOPROVINCIA,NOM_ORGPOLITICA) %>% summarise(votos = sum(NUM_VOTOS_ORGPOL, na.rm = T))  %>% mutate(ganadorGP06 = NOM_ORGPOLITICA)
 ```
 
 ```{r}
@@ -550,7 +575,12 @@ data_finalGP02 = data_finalGP02 %>%
 ###### Concentración:
 
 ```{r}
-ganadoresGP =dataGP02 %>% group_by(UBIGEOPROVINCIA,NOM_ORGPOLITICA) %>% summarise(votos = sum(NUM_VOTOS_ORGPOL, na.rm = T))  %>% mutate(ganadorGP02 = NOM_ORGPOLITICA)
+dataGP022 = dataGP02[!dataGP02$NOM_ORGPOLITICA == "VOTOS EN BLANCO",]
+dataGP022 = dataGP022[!dataGP022$NOM_ORGPOLITICA == "VOTOS NULOS",]
+```
+
+```{r}
+ganadoresGP =dataGP022 %>% group_by(UBIGEOPROVINCIA,NOM_ORGPOLITICA) %>% summarise(votos = sum(NUM_VOTOS_ORGPOL, na.rm = T))  %>% mutate(ganadorGP02 = NOM_ORGPOLITICA)
 ```
 
 ```{r}

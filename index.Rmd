@@ -20,6 +20,7 @@ library(maps)
 library(plotrix)
 library(scales)
 library(kableExtra)
+library(tidyverse)
 ```
 
 ```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE, results='hide'}
@@ -30,11 +31,61 @@ peruframe=rgdal::readOGR("borderPeru.shp")
 load("data_regional.Rda")
 datareg=as.data.frame(data_regional)
 
+gruposCantidad=3
+etiquetas1=c('bajo','medio','alto')
+
+datareg[c("NEPGR1", "NEPGR2", "NEPGR3", "NEPGR4", "NEPGR5")]=lapply(datareg[c("NEPGR02", "NEPGR06", "NEPGR10", "NEPGR14", "NEPGR18")],cut,
+       breaks = gruposCantidad,
+       labels = etiquetas1,
+       ordered_result = T)
+
+datareg[c("concentracionGR1", "concentracionGR2", "concentracionGR3", "concentracionGR4", "concentracionGR5")]=lapply(datareg[c("concentracionGR02", "concentracionGR06", "concentracionGR10", "concentracionGR14", "concentracionGR18")],cut,
+       breaks = gruposCantidad,
+       labels = etiquetas1,
+       ordered_result = T)
+
+datareg[c("competitividadGR1", "competitividadGR2", "competitividadGR3", "competitividadGR4", "competitividadGR5")]=lapply(datareg[c("competitividadGR02", "competitividadGR06", "competitividadGR10", "competitividadGR14", "competitividadGR18")],cut,
+       breaks = gruposCantidad,
+       labels = etiquetas1,
+       ordered_result = T)
+
+datareg[c("ausentesGR1", "ausentesGR2", "ausentesGR3", "ausentesGR4", "ausentesGR5")]=lapply(datareg[c("por_ausentesGR02", "por_ausentesGR06", "por_ausentesGR10", "por_ausentesGR14", "por_ausentesGR18")],cut,
+       breaks = gruposCantidad,
+       labels = etiquetas1,
+       ordered_result = T)
+
 plgsR=rgdal::readOGR("DEPARTAMENTO_16_03_2015.shp")
 plgsR  = merge(plgsR, datareg, by.x="IDDPTO", by.y="ID")
+```
+
+
+```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
 
 load("data_provincial.Rda")
 dataprov=as.data.frame(data_provincial)
+
+gruposCantidad=3
+etiquetas1=c('bajo','medio','alto')
+
+dataprov[c("NEPGP1", "NEPGP2", "NEPGP3", "NEPGP4", "NEPGP5")]=lapply(dataprov[c("NEPGP02", "NEPGP06", "NEPGP10", "NEPGP14", "NEPGP18")],cut,
+       breaks = gruposCantidad,
+       labels = etiquetas1,
+       ordered_result = T)
+
+dataprov[c("concentracionGP1", "concentracionGP2", "concentracionGP3", "concentracionGP4", "concentracionGP5")]=lapply(dataprov[c("concentracionGP02", "concentracionGP06", "concentracionGP10", "concentracionGP14", "concentracionGP18")],cut,
+       breaks = gruposCantidad,
+       labels = etiquetas1,
+       ordered_result = T)
+
+dataprov[c("competitividadGP1", "competitividadGP2", "competitividadGP3", "competitividadGP4", "competitividadGP5")]=lapply(dataprov[c("competitividadGP02", "competitividadGP06", "competitividadGP10", "competitividadGP14", "competitividadGP18")],cut,
+       breaks = gruposCantidad,
+       labels = etiquetas1,
+       ordered_result = T)
+
+dataprov[c("ausentesGP1", "ausentesGP2", "ausentesGP3", "ausentesGP4", "ausentesGP5")]=lapply(dataprov[c("por_ausentesGP02", "por_ausentesGP06", "por_ausentesGP10", "por_ausentesGP14", "por_ausentesGP18")],cut,
+       breaks = gruposCantidad,
+       labels = etiquetas1,
+       ordered_result = T)
 
 plgsP=rgdal::readOGR("PROVINCIA_16_03_2015.shp")
 plgsP  <- merge(plgsP, dataprov, by="ID") 
@@ -42,33 +93,18 @@ plgsP  <- merge(plgsP, dataprov, by="ID")
 
 El presente proyecto analiza la dimensión electoral de la política subnacional en el Perú. A partir del análisis de tres indicadores políticos, se buscan identificar los principales cambios y continuidades de la dinámica subnacional del país. Se contruye a partir del trabajo de Aragón (2010). 
 
-  * [Indicadores Políticos](#D0)
-  * [Elecciones Regionales](#D1)
-  * [Elecciones Provinciales](#D2)
-  * [Elecciones Distritales](#D3)
+  * [Fragmentación Electoral](#D0)
+  * [Indicador de Competitividad](#D1)
+  * [Indicador de Fragmentación](#D2)
 
-### Índicadores Políticos
+### Fragmentación Electoral
 
 <a id='D0'></a> 
-
-#### Fragmentación Electoral
 
 El concepto de fragmentación electoral alude a la dispersión de los votos emitidos en relación con las opciones políticas (partidos, organizaciones o candidatos) que compiten en una determinada elección. Un indicador comúnmente usado para medir el grado de fragmentación
 electoral en un proceso electoral particular es el *Número Efectivo de Partidos (NEP).*
 
-#### Análisis de Competitividad
-
-El concepto de competitividad electoral alude a la distancia que se ha producido entre los partidos, organizaciones o candidatos que ocuparon el primer y el segundo lugar en un determinado proceso electoral. Por lo tanto el indicador comúnmente usado para medir el grado de competitividad registra la diferencia en la proporción de votos válidos emitidos entre las opciones electorales que quedaron en primer y segundo lugar.
-
-#### Análisis de Concentración
-
-El concepto de concentración electoral alude a la capacidad que tuvieron las dos opciones electorales más votadas para atraer las preferencias electorales. El indicador de concentración electoral más comúnmente usado registra valores que van en un rango de 0 a 1, donde 0 corresponde al mínimo y 1 al máximo de la concentración electoral.
-
-###  Elecciones Regionales
-
-<a id='D1'></a> 
-
-#### Fragmentación Electoral
+#### Elecciones Regionales 
 
 **Estadisticos descriptivos: Indicador de Fragmentación Electoral (NEP) en las Elecciones Regionales**
 
@@ -96,330 +132,89 @@ kable(v_tab)  %>%
   kable_styling(bootstrap_options = c("striped", "hover"))
 ```
 
+**Evolución en el tiempo: Indicador de Fragmentación Electoral (NEP) en las Elecciones Regionales**
+
+```{r echo=FALSE, fig.height=3.5,  message=FALSE, warning=FALSE}
+vars=c("NEPGR02",  "NEPGR06", "NEPGR10", "NEPGR14", "NEPGR18")
+datareg2=datareg[vars]
+names(datareg2) = c("2002", "2006", "2010", "2014", "2018")
+
+datareg2=datareg2 %>% gather(Year, NEP)
+
+ggplot(datareg2, aes(x=Year, y=NEP)) + geom_boxplot(outlier.colour="black", outlier.shape=16,
+             outlier.size=2, notch=T,fill='steelblue') +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black"))+ labs( y="Nivel de Fragmentacion Politica",x="") 
+```
+
 **Mapas Electorales: Indicador de Fragmentación Electoral (NEP) en las Elecciones Regionales**
 
-```{r, eval=TRUE, echo=FALSE, fig.height=8, fig.show='hold', fig.width=10, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r, eval=TRUE, echo=FALSE, fig.height=6, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
 library(maps)
 
 par(mfrow=c(2,3))
 
 # Elecciones 2002
-info_1 = plgsR[!is.na(plgsR$NEPGR02) &  plgsR$NEPGR02 < 2,]
-info_2 = plgsR[!is.na(plgsR$NEPGR02) &  plgsR$NEPGR02>= 2 & plgsR$NEPGR02 < 4,]
-info_3 = plgsR[!is.na(plgsR$NEPGR02) &  plgsR$NEPGR02 >= 4 & plgsR$NEPGR02 < 6,]
-info_4 = plgsR[!is.na(plgsR$NEPGR02) &  plgsR$NEPGR02 >= 6 & plgsR$NEPGR02 < 8,]
-info_5 = plgsR[!is.na(plgsR$NEPGR02) &  plgsR$NEPGR02 >= 8,]
+info_1 = plgsR[!is.na(plgsR$NEPGR1) & plgsR$NEPGR1=="bajo",]
+info_2 = plgsR[!is.na(plgsR$NEPGR1) & plgsR$NEPGR1=="medio",]
+info_3 = plgsR[!is.na(plgsR$NEPGR1) & plgsR$NEPGR1=="alto",]
 
 plot(peruframe, main="2002",cex.main=1.5,border=NA)
-plot(info_1,col='#fef0d9',lty=0,add = TRUE,border=NA)
-plot(info_2,col='#fdcc8a',lty=0,add = TRUE,border=NA)
-plot(info_3,col='#fc8d59',lty=0,add = TRUE,border=NA)
-plot(info_4,col='#e34a33',lty=0,add = TRUE,border=NA)
-plot(info_5,col='#b30000',lty=0,add = TRUE,border=NA)
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
 
 # Elecciones 2006
-info_1 = plgsR[!is.na(plgsR$NEPGR06) &  plgsR$NEPGR06 < 2,]
-info_2 = plgsR[!is.na(plgsR$NEPGR06) &  plgsR$NEPGR06>= 2 & plgsR$NEPGR06 < 4,]
-info_3 = plgsR[!is.na(plgsR$NEPGR06) &  plgsR$NEPGR06 >= 4 & plgsR$NEPGR06 < 6,]
-info_4 = plgsR[!is.na(plgsR$NEPGR06) &  plgsR$NEPGR06 >= 6 & plgsR$NEPGR06 < 8,]
-info_5 = plgsR[!is.na(plgsR$NEPGR06) &  plgsR$NEPGR06 >= 8,]
+info_1 = plgsR[!is.na(plgsR$NEPGR2) & plgsR$NEPGR2=="bajo",]
+info_2 = plgsR[!is.na(plgsR$NEPGR2) & plgsR$NEPGR2=="medio",]
+info_3 = plgsR[!is.na(plgsR$NEPGR2) & plgsR$NEPGR2=="alto",]
 
 plot(peruframe, main="2006",cex.main=1.5,border=NA)
-plot(info_1,col='#fef0d9',lty=0,add = TRUE,border=NA)
-plot(info_2,col='#fdcc8a',lty=0,add = TRUE,border=NA)
-plot(info_3,col='#fc8d59',lty=0,add = TRUE,border=NA)
-plot(info_4,col='#e34a33',lty=0,add = TRUE,border=NA)
-plot(info_5,col='#b30000',lty=0,add = TRUE,border=NA)
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
 
 # Elecciones 2010
-info_1 = plgsR[!is.na(plgsR$NEPGR10) &  plgsR$NEPGR10 < 2,]
-info_2 = plgsR[!is.na(plgsR$NEPGR10) &  plgsR$NEPGR10 >= 2 & plgsR$NEPGR10 < 4,]
-info_3 = plgsR[!is.na(plgsR$NEPGR10) &  plgsR$NEPGR10 >= 4 & plgsR$NEPGR10 < 6,]
-info_4 = plgsR[!is.na(plgsR$NEPGR10) &  plgsR$NEPGR10 >= 6 & plgsR$NEPGR10 < 8,]
-info_5 = plgsR[!is.na(plgsR$NEPGR10) &  plgsR$NEPGR10 >= 8,]
+info_1 = plgsR[!is.na(plgsR$NEPGR3) & plgsR$NEPGR3=="bajo",]
+info_2 = plgsR[!is.na(plgsR$NEPGR3) & plgsR$NEPGR3=="medio",]
+info_3 = plgsR[!is.na(plgsR$NEPGR3) & plgsR$NEPGR3=="alto",]
 
 plot(peruframe, main="2010",cex.main=1.5,border=NA)
-plot(info_1,col='#fef0d9',lty=0,add = TRUE,border=NA)
-plot(info_2,col='#fdcc8a',lty=0,add = TRUE,border=NA)
-plot(info_3,col='#fc8d59',lty=0,add = TRUE,border=NA)
-plot(info_4,col='#e34a33',lty=0,add = TRUE,border=NA)
-plot(info_5,col='#b30000',lty=0,add = TRUE,border=NA)
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
 
 # Elecciones 2014
-info_1 = plgsR[!is.na(plgsR$NEPGR14) &  plgsR$NEPGR14 < 2,]
-info_2 = plgsR[!is.na(plgsR$NEPGR14) &  plgsR$NEPGR14 >= 2 & plgsR$NEPGR14 < 4,]
-info_3 = plgsR[!is.na(plgsR$NEPGR14) &  plgsR$NEPGR14 >= 4 & plgsR$NEPGR14 < 6,]
-info_4 = plgsR[!is.na(plgsR$NEPGR14) &  plgsR$NEPGR14 >= 6 & plgsR$NEPGR14 < 8,]
-info_5 = plgsR[!is.na(plgsR$NEPGR14) &  plgsR$NEPGR14 >= 8,]
+info_1 = plgsR[!is.na(plgsR$NEPGR4) & plgsR$NEPGR4=="bajo",]
+info_2 = plgsR[!is.na(plgsR$NEPGR4) & plgsR$NEPGR4=="medio",]
+info_3 = plgsR[!is.na(plgsR$NEPGR4) & plgsR$NEPGR4=="alto",]
 
 plot(peruframe, main="2014",cex.main=1.5,border=NA)
-plot(info_1,col='#fef0d9',lty=0,add = TRUE,border=NA)
-plot(info_2,col='#fdcc8a',lty=0,add = TRUE,border=NA)
-plot(info_3,col='#fc8d59',lty=0,add = TRUE,border=NA)
-plot(info_4,col='#e34a33',lty=0,add = TRUE,border=NA)
-plot(info_5,col='#b30000',lty=0,add = TRUE,border=NA)
-
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
 
 # Elecciones 2018
-info_1 = plgsR[!is.na(plgsR$NEPGR18) &  plgsR$NEPGR18 < 2,]
-info_2 = plgsR[!is.na(plgsR$NEPGR18) &  plgsR$NEPGR18 >= 2 & plgsR$NEPGR18 < 4,]
-info_3 = plgsR[!is.na(plgsR$NEPGR18) &  plgsR$NEPGR18 >= 4 & plgsR$NEPGR18 < 6,]
-info_4 = plgsR[!is.na(plgsR$NEPGR18) &  plgsR$NEPGR18 >= 6 & plgsR$NEPGR18 < 8,]
-info_5 = plgsR[!is.na(plgsR$NEPGR18) &  plgsR$NEPGR18 >= 8,]
+info_1 = plgsR[!is.na(plgsR$NEPGR5) & plgsR$NEPGR5=="bajo",]
+info_2 = plgsR[!is.na(plgsR$NEPGR5) & plgsR$NEPGR5=="medio",]
+info_3 = plgsR[!is.na(plgsR$NEPGR5) & plgsR$NEPGR5=="alto",]
 
 plot(peruframe, main="2018",cex.main=1.5,border=NA)
-plot(info_1,col='#fef0d9',lty=0,add = TRUE,border=NA)
-plot(info_2,col='#fdcc8a',lty=0,add = TRUE,border=NA)
-plot(info_3,col='#fc8d59',lty=0,add = TRUE,border=NA)
-plot(info_4,col='#e34a33',lty=0,add = TRUE,border=NA)
-plot(info_5,col='#b30000',lty=0,add = TRUE,border=NA)
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
 
 # Elecciones leyenda
 
 plot(peruframe, col="white",border=NA)
 
 legend("center",title='NEP',
-       legend=c("0.00 - 2.00", "2.00 - 4.00", "4.00 - 6.00", "6.00 - 8.00", "8.00 - 10.00"),
-       fill=c('#fef0d9','#fdcc8a',"#fc8d59", "#e34a33", "#b30000"),cex=1.2,bty = "n")
-
-```
-
-#### Competitividad Electoral
-
-**Estadisticos descriptivos: Indicador de Competitividad en las Elecciones Regionales**
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
-vars=c("competitividadGR02",  "competitividadGR06", "competitividadGR10", "competitividadGR14", "competitividadGR18")
-
-v_mean <- lapply(data_regional[vars], mean, na.rm=TRUE)
-v_median <- lapply(data_regional[vars], median, na.rm=TRUE)
-v_sd <- lapply(data_regional[vars], sd, na.rm=TRUE)
-v_min <- lapply(data_regional[vars], min, na.rm=TRUE)
-v_max <- lapply(data_regional[vars], max, na.rm=TRUE)
-
-v_mean <- round(as.numeric(v_mean), 2)
-v_median <- round(as.numeric(v_median), 2)
-v_sd <- round(as.numeric(v_sd), 2)
-v_min <- round(as.numeric(v_min), 2)
-v_max <- round(as.numeric(v_max), 2)
-
-v_tab <- cbind(media=v_mean, mediana=v_median,sd=v_sd,min=v_min, max=v_max)
-row.names(v_tab) = c("2002", "2006", "2010", "2014", "2018")
-
-v_tab=as.data.frame(t(v_tab))
-
-kable(v_tab)  %>%
-  kable_styling(bootstrap_options = c("striped", "hover"))
-```
-
-**Mapas Electorales: Indicador de Competitividad en las Elecciones Regionales**
-
-```{r, eval=TRUE, echo=FALSE, fig.height=8, fig.show='hold', fig.width=10, message=FALSE, warning=FALSE, paged.print=FALSE}
-library(maps)
-
-par(mfrow=c(2,3))
-
-# Elecciones 2002
-info_1 = plgsR[!is.na(plgsR$competitividadGR02) &  plgsR$competitividadGR02 < 0.08,]
-info_2 = plgsR[!is.na(plgsR$competitividadGR02) &  plgsR$competitividadGR02>= 0.08 & plgsR$competitividadGR02 < 0.16,]
-info_3 = plgsR[!is.na(plgsR$competitividadGR02) &  plgsR$competitividadGR02 >= 0.16 & plgsR$competitividadGR02 < 0.24,]
-info_4 = plgsR[!is.na(plgsR$competitividadGR02) &  plgsR$competitividadGR02 >= 0.24 & plgsR$competitividadGR02 < 0.32,]
-info_5 = plgsR[!is.na(plgsR$competitividadGR02) &  plgsR$competitividadGR02 >= 0.32,]
-
-plot(peruframe, main="2002",cex.main=1.5,border=NA)
-plot(info_1,col='#fef0d9',lty=0,add = TRUE,border=NA)
-plot(info_2,col='#fdcc8a',lty=0,add = TRUE,border=NA)
-plot(info_3,col='#fc8d59',lty=0,add = TRUE,border=NA)
-plot(info_4,col='#e34a33',lty=0,add = TRUE,border=NA)
-plot(info_5,col='#b30000',lty=0,add = TRUE,border=NA)
-
-# Elecciones 2006
-info_1 = plgsR[!is.na(plgsR$competitividadGR06) &  plgsR$competitividadGR06 < 0.08,]
-info_2 = plgsR[!is.na(plgsR$competitividadGR06) &  plgsR$competitividadGR06>= 0.08 & plgsR$competitividadGR06 < 0.16,]
-info_3 = plgsR[!is.na(plgsR$competitividadGR06) &  plgsR$competitividadGR06 >= 0.16 & plgsR$competitividadGR06 < 0.24,]
-info_4 = plgsR[!is.na(plgsR$competitividadGR06) &  plgsR$competitividadGR06 >= 0.24 & plgsR$competitividadGR06 < 0.32,]
-info_5 = plgsR[!is.na(plgsR$competitividadGR06) &  plgsR$competitividadGR06 >= 0.32,]
-
-plot(peruframe, main="2006",cex.main=1.5,border=NA)
-plot(info_1,col='#fef0d9',lty=0,add = TRUE,border=NA)
-plot(info_2,col='#fdcc8a',lty=0,add = TRUE,border=NA)
-plot(info_3,col='#fc8d59',lty=0,add = TRUE,border=NA)
-plot(info_4,col='#e34a33',lty=0,add = TRUE,border=NA)
-plot(info_5,col='#b30000',lty=0,add = TRUE,border=NA)
-
-# Elecciones 2010
-info_1 = plgsR[!is.na(plgsR$competitividadGR10) &  plgsR$competitividadGR10 < 0.08,]
-info_2 = plgsR[!is.na(plgsR$competitividadGR10) &  plgsR$competitividadGR10 >= 0.08 & plgsR$competitividadGR10 < 0.16,]
-info_3 = plgsR[!is.na(plgsR$competitividadGR10) &  plgsR$competitividadGR10 >= 0.16 & plgsR$competitividadGR10 < 0.24,]
-info_4 = plgsR[!is.na(plgsR$competitividadGR10) &  plgsR$competitividadGR10 >= 0.24 & plgsR$competitividadGR10 < 0.32,]
-info_5 = plgsR[!is.na(plgsR$competitividadGR10) &  plgsR$competitividadGR10 >= 0.32,]
-
-plot(peruframe, main="2010",cex.main=1.5,border=NA)
-plot(info_1,col='#fef0d9',lty=0,add = TRUE,border=NA)
-plot(info_2,col='#fdcc8a',lty=0,add = TRUE,border=NA)
-plot(info_3,col='#fc8d59',lty=0,add = TRUE,border=NA)
-plot(info_4,col='#e34a33',lty=0,add = TRUE,border=NA)
-plot(info_5,col='#b30000',lty=0,add = TRUE,border=NA)
-
-# Elecciones 2014
-info_1 = plgsR[!is.na(plgsR$competitividadGR14) &  plgsR$competitividadGR14 < 0.08,]
-info_2 = plgsR[!is.na(plgsR$competitividadGR14) &  plgsR$competitividadGR14 >= 0.08 & plgsR$competitividadGR14 < 0.16,]
-info_3 = plgsR[!is.na(plgsR$competitividadGR14) &  plgsR$competitividadGR14 >= 0.16 & plgsR$competitividadGR14 < 0.24,]
-info_4 = plgsR[!is.na(plgsR$competitividadGR14) &  plgsR$competitividadGR14 >= 0.24 & plgsR$competitividadGR14 < 0.32,]
-info_5 = plgsR[!is.na(plgsR$competitividadGR14) &  plgsR$competitividadGR14 >= 0.32,]
-
-plot(peruframe, main="2014",cex.main=1.5,border=NA)
-plot(info_1,col='#fef0d9',lty=0,add = TRUE,border=NA)
-plot(info_2,col='#fdcc8a',lty=0,add = TRUE,border=NA)
-plot(info_3,col='#fc8d59',lty=0,add = TRUE,border=NA)
-plot(info_4,col='#e34a33',lty=0,add = TRUE,border=NA)
-plot(info_5,col='#b30000',lty=0,add = TRUE,border=NA)
-
-
-# Elecciones 2018
-info_1 = plgsR[!is.na(plgsR$competitividadGR18) &  plgsR$competitividadGR18 < 0.08,]
-info_2 = plgsR[!is.na(plgsR$competitividadGR18) &  plgsR$competitividadGR18 >= 0.08 & plgsR$competitividadGR18 < 0.16,]
-info_3 = plgsR[!is.na(plgsR$competitividadGR18) &  plgsR$competitividadGR18 >= 0.16 & plgsR$competitividadGR18 < 0.24,]
-info_4 = plgsR[!is.na(plgsR$competitividadGR18) &  plgsR$competitividadGR18 >= 0.24 & plgsR$competitividadGR18 < 0.32,]
-info_5 = plgsR[!is.na(plgsR$competitividadGR18) &  plgsR$competitividadGR18 >= 0.32,]
-
-plot(peruframe, main="2018",cex.main=1.5,border=NA)
-plot(info_1,col='#fef0d9',lty=0,add = TRUE,border=NA)
-plot(info_2,col='#fdcc8a',lty=0,add = TRUE,border=NA)
-plot(info_3,col='#fc8d59',lty=0,add = TRUE,border=NA)
-plot(info_4,col='#e34a33',lty=0,add = TRUE,border=NA)
-plot(info_5,col='#b30000',lty=0,add = TRUE,border=NA)
-
-# Elecciones leyenda
-
-plot(peruframe, col="white",border=NA)
-
-legend("center",title='competitividad',
-       legend=c("0.00 - 0.08", "0.08 - 0.16", "0.16 - 0.24", "0.24 - 0.32", "0.32 - 0.40"),
-       fill=c('#fef0d9','#fdcc8a',"#fc8d59", "#e34a33", "#b30000"),cex=1.2,bty = "n")
-
-```
-
-**Mapas Electorales: Indicador de Concentración en las Elecciones Regionales**
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
-vars=c("concentracionGR02",  "concentracionGR06", "concentracionGR10", "concentracionGR14", "concentracionGR18")
-
-v_mean <- lapply(data_regional[vars], mean, na.rm=TRUE)
-v_median <- lapply(data_regional[vars], median, na.rm=TRUE)
-v_sd <- lapply(data_regional[vars], sd, na.rm=TRUE)
-v_min <- lapply(data_regional[vars], min, na.rm=TRUE)
-v_max <- lapply(data_regional[vars], max, na.rm=TRUE)
-
-v_mean <- round(as.numeric(v_mean), 2)
-v_median <- round(as.numeric(v_median), 2)
-v_sd <- round(as.numeric(v_sd), 2)
-v_min <- round(as.numeric(v_min), 2)
-v_max <- round(as.numeric(v_max), 2)
-
-v_tab <- cbind(media=v_mean, mediana=v_median,sd=v_sd,min=v_min, max=v_max)
-row.names(v_tab) = c("2002", "2006", "2010", "2014", "2018")
-
-v_tab=as.data.frame(t(v_tab))
-
-kable(v_tab)  %>%
-  kable_styling(bootstrap_options = c("striped", "hover"))
-```
-
-**Mapas Electorales: Indicador de Concentracion en las Elecciones Regionales**
-
-```{r, eval=TRUE, echo=FALSE, fig.height=8, fig.show='hold', fig.width=10, message=FALSE, warning=FALSE, paged.print=FALSE}
-library(maps)
-
-par(mfrow=c(2,3))
-
-# Elecciones 2002
-info_1 = plgsR[!is.na(plgsR$concentracionGR02) &  plgsR$concentracionGR02 < 0.20,]
-info_2 = plgsR[!is.na(plgsR$concentracionGR02) &  plgsR$concentracionGR02>= 0.20 & plgsR$concentracionGR02 < 0.40,]
-info_3 = plgsR[!is.na(plgsR$concentracionGR02) &  plgsR$concentracionGR02 >= 0.40 & plgsR$concentracionGR02 < 0.60,]
-info_4 = plgsR[!is.na(plgsR$concentracionGR02) &  plgsR$concentracionGR02 >= 0.60 & plgsR$concentracionGR02 < 0.80,]
-info_5 = plgsR[!is.na(plgsR$concentracionGR02) &  plgsR$concentracionGR02 >= 0.80,]
-
-plot(peruframe, main="2002",cex.main=1.5,border=NA)
-plot(info_1,col='#fef0d9',lty=0,add = TRUE,border=NA)
-plot(info_2,col='#fdcc8a',lty=0,add = TRUE,border=NA)
-plot(info_3,col='#fc8d59',lty=0,add = TRUE,border=NA)
-plot(info_4,col='#e34a33',lty=0,add = TRUE,border=NA)
-plot(info_5,col='#b30000',lty=0,add = TRUE,border=NA)
-
-# Elecciones 2006
-info_1 = plgsR[!is.na(plgsR$concentracionGR06) &  plgsR$concentracionGR06 < 0.20,]
-info_2 = plgsR[!is.na(plgsR$concentracionGR06) &  plgsR$concentracionGR06>= 0.20 & plgsR$concentracionGR06 < 0.40,]
-info_3 = plgsR[!is.na(plgsR$concentracionGR06) &  plgsR$concentracionGR06 >= 0.40 & plgsR$concentracionGR06 < 0.60,]
-info_4 = plgsR[!is.na(plgsR$concentracionGR06) &  plgsR$concentracionGR06 >= 0.60 & plgsR$concentracionGR06 < 0.80,]
-info_5 = plgsR[!is.na(plgsR$concentracionGR06) &  plgsR$concentracionGR06 >= 0.80,]
-
-plot(peruframe, main="2006",cex.main=1.5,border=NA)
-plot(info_1,col='#fef0d9',lty=0,add = TRUE,border=NA)
-plot(info_2,col='#fdcc8a',lty=0,add = TRUE,border=NA)
-plot(info_3,col='#fc8d59',lty=0,add = TRUE,border=NA)
-plot(info_4,col='#e34a33',lty=0,add = TRUE,border=NA)
-plot(info_5,col='#b30000',lty=0,add = TRUE,border=NA)
-
-# Elecciones 2010
-info_1 = plgsR[!is.na(plgsR$concentracionGR10) &  plgsR$concentracionGR10 < 0.20,]
-info_2 = plgsR[!is.na(plgsR$concentracionGR10) &  plgsR$concentracionGR10 >= 0.20 & plgsR$concentracionGR10 < 0.40,]
-info_3 = plgsR[!is.na(plgsR$concentracionGR10) &  plgsR$concentracionGR10 >= 0.40 & plgsR$concentracionGR10 < 0.60,]
-info_4 = plgsR[!is.na(plgsR$concentracionGR10) &  plgsR$concentracionGR10 >= 0.60 & plgsR$concentracionGR10 < 0.80,]
-info_5 = plgsR[!is.na(plgsR$concentracionGR10) &  plgsR$concentracionGR10 >= 0.80,]
-
-plot(peruframe, main="2010",cex.main=1.5,border=NA)
-plot(info_1,col='#fef0d9',lty=0,add = TRUE,border=NA)
-plot(info_2,col='#fdcc8a',lty=0,add = TRUE,border=NA)
-plot(info_3,col='#fc8d59',lty=0,add = TRUE,border=NA)
-plot(info_4,col='#e34a33',lty=0,add = TRUE,border=NA)
-plot(info_5,col='#b30000',lty=0,add = TRUE,border=NA)
-
-# Elecciones 2014
-info_1 = plgsR[!is.na(plgsR$concentracionGR14) &  plgsR$concentracionGR14 < 0.20,]
-info_2 = plgsR[!is.na(plgsR$concentracionGR14) &  plgsR$concentracionGR14 >= 0.20 & plgsR$concentracionGR14 < 0.40,]
-info_3 = plgsR[!is.na(plgsR$concentracionGR14) &  plgsR$concentracionGR14 >= 0.40 & plgsR$concentracionGR14 < 0.60,]
-info_4 = plgsR[!is.na(plgsR$concentracionGR14) &  plgsR$concentracionGR14 >= 0.60 & plgsR$concentracionGR14 < 0.80,]
-info_5 = plgsR[!is.na(plgsR$concentracionGR14) &  plgsR$concentracionGR14 >= 0.80,]
-
-plot(peruframe, main="2014",cex.main=1.5,border=NA)
-plot(info_1,col='#fef0d9',lty=0,add = TRUE,border=NA)
-plot(info_2,col='#fdcc8a',lty=0,add = TRUE,border=NA)
-plot(info_3,col='#fc8d59',lty=0,add = TRUE,border=NA)
-plot(info_4,col='#e34a33',lty=0,add = TRUE,border=NA)
-plot(info_5,col='#b30000',lty=0,add = TRUE,border=NA)
-
-
-# Elecciones 2018
-info_1 = plgsR[!is.na(plgsR$concentracionGR18) &  plgsR$concentracionGR18 < 0.20,]
-info_2 = plgsR[!is.na(plgsR$concentracionGR18) &  plgsR$concentracionGR18 >= 0.20 & plgsR$concentracionGR18 < 0.40,]
-info_3 = plgsR[!is.na(plgsR$concentracionGR18) &  plgsR$concentracionGR18 >= 0.40 & plgsR$concentracionGR18 < 0.60,]
-info_4 = plgsR[!is.na(plgsR$concentracionGR18) &  plgsR$concentracionGR18 >= 0.60 & plgsR$concentracionGR18 < 0.80,]
-info_5 = plgsR[!is.na(plgsR$concentracionGR18) &  plgsR$concentracionGR18 >= 0.80,]
-
-plot(peruframe, main="2018",cex.main=1.5,border=NA)
-plot(info_1,col='#fef0d9',lty=0,add = TRUE,border=NA)
-plot(info_2,col='#fdcc8a',lty=0,add = TRUE,border=NA)
-plot(info_3,col='#fc8d59',lty=0,add = TRUE,border=NA)
-plot(info_4,col='#e34a33',lty=0,add = TRUE,border=NA)
-plot(info_5,col='#b30000',lty=0,add = TRUE,border=NA)
-
-# Elecciones leyenda
-
-plot(peruframe, col="white",border=NA)
-
-legend("center",title='concentracion',
-       legend=c("0.00 - 0.20", "0.20 - 0.40", "0.40 - 0.60", "0.60 - 0.80", "0.80 - 1.00"),
-       fill=c('#fef0d9','#fdcc8a',"#fc8d59", "#e34a33", "#b30000"),cex=1.2,bty = "n")
+       legend=c("Bajo", "Medio", "Alto"),
+       fill=c('#ffeda0','#feb24c',"#f03b20"),cex=1.2,bty = "n")
 
 ```
 
 
-###  Elecciones Provinciales
-
-<a id='D2'></a> 
-
-#### Fragmentación Electoral
+#### Elecciones Provinciales 
 
 **Estadisticos descriptivos: Indicador de Fragmentación Electoral (NEP) en las Elecciones Provinciales**
 
@@ -447,95 +242,202 @@ kable(v_tab)  %>%
   kable_styling(bootstrap_options = c("striped", "hover"))
 ```
 
+**Evolución en el tiempo: Indicador de Fragmentación Electoral (NEP) en las Elecciones Provinciales**
+
+```{r echo=FALSE, fig.height=3.5,  message=FALSE, warning=FALSE}
+vars=c("NEPGP02",  "NEPGP06", "NEPGP10", "NEPGP14", "NEPGP18")
+dataprov2=dataprov[vars]
+names(dataprov2) = c("2002", "2006", "2010", "2014", "2018")
+
+dataprov2=dataprov2 %>% gather(Year, NEP)
+
+ggplot(dataprov2, aes(x=Year, y=NEP)) + geom_boxplot(outlier.colour="black", outlier.shape=16,
+             outlier.size=2, notch=T,fill='steelblue') +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black"))+ labs( y="Nivel de Fragmentacion Politica",x="") 
+```
+
 **Mapas Electorales: Indicador de Fragmentación Electoral (NEP) en las Elecciones Provinciales**
 
-```{r, eval=TRUE, echo=FALSE, fig.height=8, fig.show='hold', fig.width=10, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r, eval=TRUE, echo=FALSE, fig.height=6, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
 library(maps)
 
 par(mfrow=c(2,3))
 
 # Elecciones 2002
-info_1 = plgsP[!is.na(plgsP$NEPGP02) &  plgsP$NEPGP02 < 2,]
-info_2 = plgsP[!is.na(plgsP$NEPGP02) &  plgsP$NEPGP02>= 2 & plgsP$NEPGP02 < 4,]
-info_3 = plgsP[!is.na(plgsP$NEPGP02) &  plgsP$NEPGP02 >= 4 & plgsP$NEPGP02 < 6,]
-info_4 = plgsP[!is.na(plgsP$NEPGP02) &  plgsP$NEPGP02 >= 6 & plgsP$NEPGP02 < 8,]
-info_5 = plgsP[!is.na(plgsP$NEPGP02) &  plgsP$NEPGP02 >= 8,]
+info_1 = plgsP[!is.na(plgsP$NEPGP1) & plgsP$NEPGP1=="bajo",]
+info_2 = plgsP[!is.na(plgsP$NEPGP1) & plgsP$NEPGP1=="medio",]
+info_3 = plgsP[ !is.na(plgsP$NEPGP1) & plgsP$NEPGP1=="alto",]
 
 plot(peruframe, main="2002",cex.main=1.5,border=NA, col="lightgrey")
-plot(info_1,col='#fef0d9',lty=0,add = TRUE,border=NA)
-plot(info_2,col='#fdcc8a',lty=0,add = TRUE,border=NA)
-plot(info_3,col='#fc8d59',lty=0,add = TRUE,border=NA)
-plot(info_4,col='#e34a33',lty=0,add = TRUE,border=NA)
-plot(info_5,col='#b30000',lty=0,add = TRUE,border=NA)
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
 
 # Elecciones 2006
-info_1 = plgsP[!is.na(plgsP$NEPGP06) &  plgsP$NEPGP06 < 2,]
-info_2 = plgsP[!is.na(plgsP$NEPGP06) &  plgsP$NEPGP06>= 2 & plgsP$NEPGP06 < 4,]
-info_3 = plgsP[!is.na(plgsP$NEPGP06) &  plgsP$NEPGP06 >= 4 & plgsP$NEPGP06 < 6,]
-info_4 = plgsP[!is.na(plgsP$NEPGP06) &  plgsP$NEPGP06 >= 6 & plgsP$NEPGP06 < 8,]
-info_5 = plgsP[!is.na(plgsP$NEPGP06) &  plgsP$NEPGP06 >= 8,]
+info_1 = plgsP[!is.na(plgsP$NEPGP2) & plgsP$NEPGP2=="bajo",]
+info_2 = plgsP[!is.na(plgsP$NEPGP2) & plgsP$NEPGP2=="medio",]
+info_3 = plgsP[ !is.na(plgsP$NEPGP2) & plgsP$NEPGP2=="alto",]
 
 plot(peruframe, main="2006",cex.main=1.5,border=NA, col="lightgrey")
-plot(info_1,col='#fef0d9',lty=0,add = TRUE,border=NA)
-plot(info_2,col='#fdcc8a',lty=0,add = TRUE,border=NA)
-plot(info_3,col='#fc8d59',lty=0,add = TRUE,border=NA)
-plot(info_4,col='#e34a33',lty=0,add = TRUE,border=NA)
-plot(info_5,col='#b30000',lty=0,add = TRUE,border=NA)
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
 
 # Elecciones 2010
-info_1 = plgsP[!is.na(plgsP$NEPGP10) &  plgsP$NEPGP10 < 2,]
-info_2 = plgsP[!is.na(plgsP$NEPGP10) &  plgsP$NEPGP10 >= 2 & plgsP$NEPGP10 < 4,]
-info_3 = plgsP[!is.na(plgsP$NEPGP10) &  plgsP$NEPGP10 >= 4 & plgsP$NEPGP10 < 6,]
-info_4 = plgsP[!is.na(plgsP$NEPGP10) &  plgsP$NEPGP10 >= 6 & plgsP$NEPGP10 < 8,]
-info_5 = plgsP[!is.na(plgsP$NEPGP10) &  plgsP$NEPGP10 >= 8,]
+info_1 = plgsP[!is.na(plgsP$NEPGP3) & plgsP$NEPGP3=="bajo",]
+info_2 = plgsP[!is.na(plgsP$NEPGP3) & plgsP$NEPGP3=="medio",]
+info_3 = plgsP[ !is.na(plgsP$NEPGP3) & plgsP$NEPGP3=="alto",]
 
 plot(peruframe, main="2010",cex.main=1.5,border=NA, col="lightgrey")
-plot(info_1,col='#fef0d9',lty=0,add = TRUE,border=NA)
-plot(info_2,col='#fdcc8a',lty=0,add = TRUE,border=NA)
-plot(info_3,col='#fc8d59',lty=0,add = TRUE,border=NA)
-plot(info_4,col='#e34a33',lty=0,add = TRUE,border=NA)
-plot(info_5,col='#b30000',lty=0,add = TRUE,border=NA)
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
 
 # Elecciones 2014
-info_1 = plgsP[!is.na(plgsP$NEPGP14) &  plgsP$NEPGP14 < 2,]
-info_2 = plgsP[!is.na(plgsP$NEPGP14) &  plgsP$NEPGP14 >= 2 & plgsP$NEPGP14 < 4,]
-info_3 = plgsP[!is.na(plgsP$NEPGP14) &  plgsP$NEPGP14 >= 4 & plgsP$NEPGP14 < 6,]
-info_4 = plgsP[!is.na(plgsP$NEPGP14) &  plgsP$NEPGP14 >= 6 & plgsP$NEPGP14 < 8,]
-info_5 = plgsP[!is.na(plgsP$NEPGP14) &  plgsP$NEPGP14 >= 8,]
+info_1 = plgsP[!is.na(plgsP$NEPGP4) & plgsP$NEPGP4=="bajo",]
+info_2 = plgsP[!is.na(plgsP$NEPGP4) & plgsP$NEPGP4=="medio",]
+info_3 = plgsP[ !is.na(plgsP$NEPGP4) & plgsP$NEPGP4=="alto",]
 
 plot(peruframe, main="2014",cex.main=1.5,border=NA, col="lightgrey")
-plot(info_1,col='#fef0d9',lty=0,add = TRUE,border=NA)
-plot(info_2,col='#fdcc8a',lty=0,add = TRUE,border=NA)
-plot(info_3,col='#fc8d59',lty=0,add = TRUE,border=NA)
-plot(info_4,col='#e34a33',lty=0,add = TRUE,border=NA)
-plot(info_5,col='#b30000',lty=0,add = TRUE,border=NA)
-
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
 
 # Elecciones 2018
-info_1 = plgsP[!is.na(plgsP$NEPGP18) &  plgsP$NEPGP18 < 2,]
-info_2 = plgsP[!is.na(plgsP$NEPGP18) &  plgsP$NEPGP18 >= 2 & plgsP$NEPGP18 < 4,]
-info_3 = plgsP[!is.na(plgsP$NEPGP18) &  plgsP$NEPGP18 >= 4 & plgsP$NEPGP18 < 6,]
-info_4 = plgsP[!is.na(plgsP$NEPGP18) &  plgsP$NEPGP18 >= 6 & plgsP$NEPGP18 < 8,]
-info_5 = plgsP[!is.na(plgsP$NEPGP18) &  plgsP$NEPGP18 >= 8,]
+info_1 = plgsP[!is.na(plgsP$NEPGP5) & plgsP$NEPGP5=="bajo",]
+info_2 = plgsP[!is.na(plgsP$NEPGP5) & plgsP$NEPGP5=="medio",]
+info_3 = plgsP[ !is.na(plgsP$NEPGP5) & plgsP$NEPGP5=="alto",]
 
 plot(peruframe, main="2018",cex.main=1.5,border=NA, col="lightgrey")
-plot(info_1,col='#fef0d9',lty=0,add = TRUE,border=NA)
-plot(info_2,col='#fdcc8a',lty=0,add = TRUE,border=NA)
-plot(info_3,col='#fc8d59',lty=0,add = TRUE,border=NA)
-plot(info_4,col='#e34a33',lty=0,add = TRUE,border=NA)
-plot(info_5,col='#b30000',lty=0,add = TRUE,border=NA)
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
 
 # Elecciones leyenda
 
 plot(peruframe, col="white",border=NA)
 
 legend("center",title='NEP',
-       legend=c("0.00 - 2.00", "2.00 - 4.00", "4.00 - 6.00", "6.00 - 8.00", "8.00 - 10.00"),
-       fill=c('#fef0d9','#fdcc8a',"#fc8d59", "#e34a33", "#b30000"),cex=1.2,bty = "n")
+       legend=c("Bajo", "Medio", "Alto"),
+       fill=c('#ffeda0','#feb24c',"#f03b20"),cex=1.2,bty = "n")
 
 ```
 
-#### Competitividad Electoral
+#### Análisis de Competitividad
+
+El concepto de competitividad electoral alude a la distancia que se ha producido entre los partidos, organizaciones o candidatos que ocuparon el primer y el segundo lugar en un determinado proceso electoral. Por lo tanto el indicador comúnmente usado para medir el grado de competitividad registra la diferencia en la proporción de votos válidos emitidos entre las opciones electorales que quedaron en primer y segundo lugar.
+
+#### Elecciones Regionales 
+
+**Estadisticos descriptivos: Indicador de Competitividad en las Elecciones Regionales**
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+vars=c("competitividadGR02",  "competitividadGR06", "competitividadGR10", "competitividadGR14", "competitividadGR18")
+
+v_mean <- lapply(data_regional[vars], mean, na.rm=TRUE)
+v_median <- lapply(data_regional[vars], median, na.rm=TRUE)
+v_sd <- lapply(data_regional[vars], sd, na.rm=TRUE)
+v_min <- lapply(data_regional[vars], min, na.rm=TRUE)
+v_max <- lapply(data_regional[vars], max, na.rm=TRUE)
+
+v_mean <- round(as.numeric(v_mean), 2)
+v_median <- round(as.numeric(v_median), 2)
+v_sd <- round(as.numeric(v_sd), 2)
+v_min <- round(as.numeric(v_min), 2)
+v_max <- round(as.numeric(v_max), 2)
+
+v_tab <- cbind(media=v_mean, mediana=v_median,sd=v_sd,min=v_min, max=v_max)
+row.names(v_tab) = c("2002", "2006", "2010", "2014", "2018")
+
+v_tab=as.data.frame(t(v_tab))
+
+kable(v_tab)  %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+**Evolución en el tiempo: Indicador de Fragmentación Electoral (competitividad) en las Elecciones Regionales**
+
+```{r echo=FALSE, fig.height=3.5,  message=FALSE, warning=FALSE}
+vars=c("competitividadGR02",  "competitividadGR06", "competitividadGR10", "competitividadGR14", "competitividadGR18")
+datareg2=datareg[vars]
+names(datareg2) = c("2002", "2006", "2010", "2014", "2018")
+
+datareg2=datareg2 %>% gather(Year, competitividad)
+
+ggplot(datareg2, aes(x=Year, y=competitividad)) + geom_boxplot(outlier.colour="black", outlier.shape=16,
+             outlier.size=2, notch=T,fill='steelblue') +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black"))+ labs( y="Nivel de Competitividad Politica",x="") 
+```
+
+**Mapas Electorales: Indicador de Competitividad en las Elecciones Regionales**
+
+```{r, eval=TRUE, echo=FALSE, fig.height=6, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
+library(maps)
+
+par(mfrow=c(2,3))
+
+# Elecciones 2002
+info_1 = plgsR[!is.na(plgsR$competitividadGR1) & plgsR$competitividadGR1=="bajo",]
+info_2 = plgsR[!is.na(plgsR$competitividadGR1) & plgsR$competitividadGR1=="medio",]
+info_3 = plgsR[!is.na(plgsR$competitividadGR1) & plgsR$competitividadGR1=="alto",]
+
+plot(peruframe, main="2002",cex.main=1.5,border=NA)
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones 2006
+info_1 = plgsR[!is.na(plgsR$competitividadGR2) & plgsR$competitividadGR2=="bajo",]
+info_2 = plgsR[!is.na(plgsR$competitividadGR2) & plgsR$competitividadGR2=="medio",]
+info_3 = plgsR[!is.na(plgsR$competitividadGR2) & plgsR$competitividadGR2=="alto",]
+
+plot(peruframe, main="2006",cex.main=1.5,border=NA)
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones 2010
+info_1 = plgsR[!is.na(plgsR$competitividadGR3) & plgsR$competitividadGR3=="bajo",]
+info_2 = plgsR[!is.na(plgsR$competitividadGR3) & plgsR$competitividadGR3=="medio",]
+info_3 = plgsR[!is.na(plgsR$competitividadGR3) & plgsR$competitividadGR3=="alto",]
+
+plot(peruframe, main="2010",cex.main=1.5,border=NA)
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones 2014
+info_1 = plgsR[!is.na(plgsR$competitividadGR4) & plgsR$competitividadGR4=="bajo",]
+info_2 = plgsR[!is.na(plgsR$competitividadGR4) & plgsR$competitividadGR4=="medio",]
+info_3 = plgsR[!is.na(plgsR$competitividadGR4) & plgsR$competitividadGR4=="alto",]
+
+plot(peruframe, main="2014",cex.main=1.5,border=NA)
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones 2018
+info_1 = plgsR[!is.na(plgsR$competitividadGR5) & plgsR$competitividadGR5=="bajo",]
+info_2 = plgsR[!is.na(plgsR$competitividadGR5) & plgsR$competitividadGR5=="medio",]
+info_3 = plgsR[!is.na(plgsR$competitividadGR5) & plgsR$competitividadGR5=="alto",]
+
+plot(peruframe, main="2018",cex.main=1.5,border=NA)
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones leyenda
+
+plot(peruframe, col="white",border=NA)
+
+legend("center",title='Competitividad',
+       legend=c("Bajo", "Medio", "Alto"),
+       fill=c('#ffeda0','#feb24c',"#f03b20"),cex=1.2,bty = "n")
+
+```
+
+
+#### Elecciones Provinciales 
 
 **Estadisticos descriptivos: Indicador de Competitividad en las Elecciones Provinciales**
 
@@ -563,95 +465,204 @@ kable(v_tab)  %>%
   kable_styling(bootstrap_options = c("striped", "hover"))
 ```
 
+**Evolución en el tiempo: Indicador de Competitividad en las Elecciones Provinciales**
+
+```{r echo=FALSE, fig.height=3.5,  message=FALSE, warning=FALSE}
+vars=c("competitividadGP02",  "competitividadGP06", "competitividadGP10", "competitividadGP14", "competitividadGP18")
+dataprov2=dataprov[vars]
+names(dataprov2) = c("2002", "2006", "2010", "2014", "2018")
+
+dataprov2=dataprov2 %>% gather(Year, competitividad)
+
+ggplot(dataprov2, aes(x=Year, y=competitividad)) + geom_boxplot(outlier.colour="black", outlier.shape=16,
+             outlier.size=2, notch=T,fill='steelblue') +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black"))+ labs( y="Nivel de Competitividad Politica",x="") 
+```
+
 **Mapas Electorales: Indicador de Competitividad en las Elecciones Provinciales**
 
-```{r, eval=TRUE, echo=FALSE, fig.height=8, fig.show='hold', fig.width=10, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r, eval=TRUE, echo=FALSE, fig.height=6, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
 library(maps)
 
 par(mfrow=c(2,3))
 
 # Elecciones 2002
-info_1 = plgsP[!is.na(plgsP$competitividadGP02) &  plgsP$competitividadGP02 < 0.08,]
-info_2 = plgsP[!is.na(plgsP$competitividadGP02) &  plgsP$competitividadGP02>= 0.08 & plgsP$competitividadGP02 < 0.16,]
-info_3 = plgsP[!is.na(plgsP$competitividadGP02) &  plgsP$competitividadGP02 >= 0.16 & plgsP$competitividadGP02 < 0.24,]
-info_4 = plgsP[!is.na(plgsP$competitividadGP02) &  plgsP$competitividadGP02 >= 0.24 & plgsP$competitividadGP02 < 0.32,]
-info_5 = plgsP[!is.na(plgsP$competitividadGP02) &  plgsP$competitividadGP02 >= 0.32,]
+info_1 = plgsP[!is.na(plgsP$competitividadGP1) & plgsP$competitividadGP1=="bajo",]
+info_2 = plgsP[!is.na(plgsP$competitividadGP1) & plgsP$competitividadGP1=="medio",]
+info_3 = plgsP[ !is.na(plgsP$competitividadGP1) & plgsP$competitividadGP1=="alto",]
 
 plot(peruframe, main="2002",cex.main=1.5,border=NA, col="lightgrey")
-plot(info_1,col='#fef0d9',lty=0,add = TRUE,border=NA)
-plot(info_2,col='#fdcc8a',lty=0,add = TRUE,border=NA)
-plot(info_3,col='#fc8d59',lty=0,add = TRUE,border=NA)
-plot(info_4,col='#e34a33',lty=0,add = TRUE,border=NA)
-plot(info_5,col='#b30000',lty=0,add = TRUE,border=NA)
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
 
 # Elecciones 2006
-info_1 = plgsP[!is.na(plgsP$competitividadGP06) &  plgsP$competitividadGP06 < 0.08,]
-info_2 = plgsP[!is.na(plgsP$competitividadGP06) &  plgsP$competitividadGP06>= 0.08 & plgsP$competitividadGP06 < 0.16,]
-info_3 = plgsP[!is.na(plgsP$competitividadGP06) &  plgsP$competitividadGP06 >= 0.16 & plgsP$competitividadGP06 < 0.24,]
-info_4 = plgsP[!is.na(plgsP$competitividadGP06) &  plgsP$competitividadGP06 >= 0.24 & plgsP$competitividadGP06 < 0.32,]
-info_5 = plgsP[!is.na(plgsP$competitividadGP06) &  plgsP$competitividadGP06 >= 0.32,]
+info_1 = plgsP[!is.na(plgsP$competitividadGP2) & plgsP$competitividadGP2=="bajo",]
+info_2 = plgsP[!is.na(plgsP$competitividadGP2) & plgsP$competitividadGP2=="medio",]
+info_3 = plgsP[ !is.na(plgsP$competitividadGP2) & plgsP$competitividadGP2=="alto",]
 
 plot(peruframe, main="2006",cex.main=1.5,border=NA, col="lightgrey")
-plot(info_1,col='#fef0d9',lty=0,add = TRUE,border=NA)
-plot(info_2,col='#fdcc8a',lty=0,add = TRUE,border=NA)
-plot(info_3,col='#fc8d59',lty=0,add = TRUE,border=NA)
-plot(info_4,col='#e34a33',lty=0,add = TRUE,border=NA)
-plot(info_5,col='#b30000',lty=0,add = TRUE,border=NA)
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
 
 # Elecciones 2010
-info_1 = plgsP[!is.na(plgsP$competitividadGP10) &  plgsP$competitividadGP10 < 0.08,]
-info_2 = plgsP[!is.na(plgsP$competitividadGP10) &  plgsP$competitividadGP10 >= 0.08 & plgsP$competitividadGP10 < 0.16,]
-info_3 = plgsP[!is.na(plgsP$competitividadGP10) &  plgsP$competitividadGP10 >= 0.16 & plgsP$competitividadGP10 < 0.24,]
-info_4 = plgsP[!is.na(plgsP$competitividadGP10) &  plgsP$competitividadGP10 >= 0.24 & plgsP$competitividadGP10 < 0.32,]
-info_5 = plgsP[!is.na(plgsP$competitividadGP10) &  plgsP$competitividadGP10 >= 0.32,]
+info_1 = plgsP[!is.na(plgsP$competitividadGP3) & plgsP$competitividadGP3=="bajo",]
+info_2 = plgsP[!is.na(plgsP$competitividadGP3) & plgsP$competitividadGP3=="medio",]
+info_3 = plgsP[ !is.na(plgsP$competitividadGP3) & plgsP$competitividadGP3=="alto",]
 
 plot(peruframe, main="2010",cex.main=1.5,border=NA, col="lightgrey")
-plot(info_1,col='#fef0d9',lty=0,add = TRUE,border=NA)
-plot(info_2,col='#fdcc8a',lty=0,add = TRUE,border=NA)
-plot(info_3,col='#fc8d59',lty=0,add = TRUE,border=NA)
-plot(info_4,col='#e34a33',lty=0,add = TRUE,border=NA)
-plot(info_5,col='#b30000',lty=0,add = TRUE,border=NA)
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
 
 # Elecciones 2014
-info_1 = plgsP[!is.na(plgsP$competitividadGP14) &  plgsP$competitividadGP14 < 0.08,]
-info_2 = plgsP[!is.na(plgsP$competitividadGP14) &  plgsP$competitividadGP14 >= 0.08 & plgsP$competitividadGP14 < 0.16,]
-info_3 = plgsP[!is.na(plgsP$competitividadGP14) &  plgsP$competitividadGP14 >= 0.16 & plgsP$competitividadGP14 < 0.24,]
-info_4 = plgsP[!is.na(plgsP$competitividadGP14) &  plgsP$competitividadGP14 >= 0.24 & plgsP$competitividadGP14 < 0.32,]
-info_5 = plgsP[!is.na(plgsP$competitividadGP14) &  plgsP$competitividadGP14 >= 0.32,]
+info_1 = plgsP[!is.na(plgsP$competitividadGP4) & plgsP$competitividadGP4=="bajo",]
+info_2 = plgsP[!is.na(plgsP$competitividadGP4) & plgsP$competitividadGP4=="medio",]
+info_3 = plgsP[ !is.na(plgsP$competitividadGP4) & plgsP$competitividadGP4=="alto",]
 
 plot(peruframe, main="2014",cex.main=1.5,border=NA, col="lightgrey")
-plot(info_1,col='#fef0d9',lty=0,add = TRUE,border=NA)
-plot(info_2,col='#fdcc8a',lty=0,add = TRUE,border=NA)
-plot(info_3,col='#fc8d59',lty=0,add = TRUE,border=NA)
-plot(info_4,col='#e34a33',lty=0,add = TRUE,border=NA)
-plot(info_5,col='#b30000',lty=0,add = TRUE,border=NA)
-
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
 
 # Elecciones 2018
-info_1 = plgsP[!is.na(plgsP$competitividadGP18) &  plgsP$competitividadGP18 < 0.08,]
-info_2 = plgsP[!is.na(plgsP$competitividadGP18) &  plgsP$competitividadGP18 >= 0.08 & plgsP$competitividadGP18 < 0.16,]
-info_3 = plgsP[!is.na(plgsP$competitividadGP18) &  plgsP$competitividadGP18 >= 0.16 & plgsP$competitividadGP18 < 0.24,]
-info_4 = plgsP[!is.na(plgsP$competitividadGP18) &  plgsP$competitividadGP18 >= 0.24 & plgsP$competitividadGP18 < 0.32,]
-info_5 = plgsP[!is.na(plgsP$competitividadGP18) &  plgsP$competitividadGP18 >= 0.32,]
+info_1 = plgsP[!is.na(plgsP$competitividadGP5) & plgsP$competitividadGP5=="bajo",]
+info_2 = plgsP[!is.na(plgsP$competitividadGP5) & plgsP$competitividadGP5=="medio",]
+info_3 = plgsP[ !is.na(plgsP$competitividadGP5) & plgsP$competitividadGP5=="alto",]
 
 plot(peruframe, main="2018",cex.main=1.5,border=NA, col="lightgrey")
-plot(info_1,col='#fef0d9',lty=0,add = TRUE,border=NA)
-plot(info_2,col='#fdcc8a',lty=0,add = TRUE,border=NA)
-plot(info_3,col='#fc8d59',lty=0,add = TRUE,border=NA)
-plot(info_4,col='#e34a33',lty=0,add = TRUE,border=NA)
-plot(info_5,col='#b30000',lty=0,add = TRUE,border=NA)
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
 
 # Elecciones leyenda
 
 plot(peruframe, col="white",border=NA)
 
-legend("center",title='competitividad',
-       legend=c("0.00 - 0.08", "0.08 - 0.16", "0.16 - 0.24", "0.24 - 0.32", "0.32 - 0.40"),
-       fill=c('#fef0d9','#fdcc8a',"#fc8d59", "#e34a33", "#b30000"),cex=1.2,bty = "n")
+legend("center",title='Competitividad',
+       legend=c("Bajo", "Medio", "Alto"),
+       fill=c('#ffeda0','#feb24c',"#f03b20"),cex=1.2,bty = "n")
 
 ```
 
-**Mapas Electorales: Indicador de Concentración en las Elecciones Provinciales**
+#### Análisis de Concentración
+
+El concepto de concentración electoral alude a la capacidad que tuvieron las dos opciones electorales más votadas para atraer las preferencias electorales. El indicador de concentración electoral más comúnmente usado registra valores que van en un rango de 0 a 1, donde 0 corresponde al mínimo y 1 al máximo de la concentración electoral.
+
+#### Elecciones Regionales 
+
+**Estadisticos descriptivos: Indicador de Concentracion en las Elecciones Regionales**
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+vars=c("concentracionGR02",  "concentracionGR06", "concentracionGR10", "concentracionGR14", "concentracionGR18")
+
+v_mean <- lapply(data_regional[vars], mean, na.rm=TRUE)
+v_median <- lapply(data_regional[vars], median, na.rm=TRUE)
+v_sd <- lapply(data_regional[vars], sd, na.rm=TRUE)
+v_min <- lapply(data_regional[vars], min, na.rm=TRUE)
+v_max <- lapply(data_regional[vars], max, na.rm=TRUE)
+
+v_mean <- round(as.numeric(v_mean), 2)
+v_median <- round(as.numeric(v_median), 2)
+v_sd <- round(as.numeric(v_sd), 2)
+v_min <- round(as.numeric(v_min), 2)
+v_max <- round(as.numeric(v_max), 2)
+
+v_tab <- cbind(media=v_mean, mediana=v_median,sd=v_sd,min=v_min, max=v_max)
+row.names(v_tab) = c("2002", "2006", "2010", "2014", "2018")
+
+v_tab=as.data.frame(t(v_tab))
+
+kable(v_tab)  %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+**Evolución en el tiempo: Indicador de Concentración Electoral (concentracion) en las Elecciones Regionales**
+
+```{r echo=FALSE, fig.height=3.5,  message=FALSE, warning=FALSE}
+vars=c("concentracionGR02",  "concentracionGR06", "concentracionGR10", "concentracionGR14", "concentracionGR18")
+datareg2=datareg[vars]
+names(datareg2) = c("2002", "2006", "2010", "2014", "2018")
+
+datareg2=datareg2 %>% gather(Year, concentracion)
+
+ggplot(datareg2, aes(x=Year, y=concentracion)) + geom_boxplot(outlier.colour="black", outlier.shape=16,
+             outlier.size=2, notch=T,fill='steelblue') +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black"))+ labs( y="Nivel de Concentracion Politica",x="") 
+```
+
+**Mapas Electorales: Indicador de Concentracion en las Elecciones Regionales**
+
+```{r, eval=TRUE, echo=FALSE, fig.height=6, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
+library(maps)
+
+par(mfrow=c(2,3))
+
+# Elecciones 2002
+info_1 = plgsR[!is.na(plgsR$concentracionGR1) & plgsR$concentracionGR1=="bajo",]
+info_2 = plgsR[!is.na(plgsR$concentracionGR1) & plgsR$concentracionGR1=="medio",]
+info_3 = plgsR[!is.na(plgsR$concentracionGR1) & plgsR$concentracionGR1=="alto",]
+
+plot(peruframe, main="2002",cex.main=1.5,border=NA)
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones 2006
+info_1 = plgsR[!is.na(plgsR$concentracionGR2) & plgsR$concentracionGR2=="bajo",]
+info_2 = plgsR[!is.na(plgsR$concentracionGR2) & plgsR$concentracionGR2=="medio",]
+info_3 = plgsR[!is.na(plgsR$concentracionGR2) & plgsR$concentracionGR2=="alto",]
+
+plot(peruframe, main="2006",cex.main=1.5,border=NA)
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones 2010
+info_1 = plgsR[!is.na(plgsR$concentracionGR3) & plgsR$concentracionGR3=="bajo",]
+info_2 = plgsR[!is.na(plgsR$concentracionGR3) & plgsR$concentracionGR3=="medio",]
+info_3 = plgsR[!is.na(plgsR$concentracionGR3) & plgsR$concentracionGR3=="alto",]
+
+plot(peruframe, main="2010",cex.main=1.5,border=NA)
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones 2014
+info_1 = plgsR[!is.na(plgsR$concentracionGR4) & plgsR$concentracionGR4=="bajo",]
+info_2 = plgsR[!is.na(plgsR$concentracionGR4) & plgsR$concentracionGR4=="medio",]
+info_3 = plgsR[!is.na(plgsR$concentracionGR4) & plgsR$concentracionGR4=="alto",]
+
+plot(peruframe, main="2014",cex.main=1.5,border=NA)
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones 2018
+info_1 = plgsR[!is.na(plgsR$concentracionGR5) & plgsR$concentracionGR5=="bajo",]
+info_2 = plgsR[!is.na(plgsR$concentracionGR5) & plgsR$concentracionGR5=="medio",]
+info_3 = plgsR[!is.na(plgsR$concentracionGR5) & plgsR$concentracionGR5=="alto",]
+
+plot(peruframe, main="2018",cex.main=1.5,border=NA)
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones leyenda
+
+plot(peruframe, col="white",border=NA)
+
+legend("center",title='Concentracion',
+       legend=c("Bajo", "Medio", "Alto"),
+       fill=c('#ffeda0','#feb24c',"#f03b20"),cex=1.2,bty = "n")
+
+```
+
+
+#### Elecciones Provinciales 
+
+**Estadisticos descriptivos: Indicador de Concentracion en las Elecciones Provinciales**
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 vars=c("concentracionGP02",  "concentracionGP06", "concentracionGP10", "concentracionGP14", "concentracionGP18")
@@ -677,94 +688,307 @@ kable(v_tab)  %>%
   kable_styling(bootstrap_options = c("striped", "hover"))
 ```
 
-**Mapas Electorales: Indicador de Concentracion en las Elecciones Provinciales**
+**Evolución en el tiempo: Indicador de concentracion en las Elecciones Provinciales**
 
-```{r, eval=TRUE, echo=FALSE, fig.height=8, fig.show='hold', fig.width=10, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r echo=FALSE, fig.height=3.5,  message=FALSE, warning=FALSE}
+vars=c("concentracionGP02",  "concentracionGP06", "concentracionGP10", "concentracionGP14", "concentracionGP18")
+dataprov2=dataprov[vars]
+names(dataprov2) = c("2002", "2006", "2010", "2014", "2018")
+
+dataprov2=dataprov2 %>% gather(Year, concentracion)
+
+ggplot(dataprov2, aes(x=Year, y=concentracion)) + geom_boxplot(outlier.colour="black", outlier.shape=16,
+             outlier.size=2, notch=T,fill='steelblue') +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black"))+ labs( y="Nivel de Concentracion Politica",x="") 
+```
+
+**Mapas Electorales: Indicador de concentracion en las Elecciones Provinciales**
+
+```{r, eval=TRUE, echo=FALSE, fig.height=6, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
 library(maps)
 
 par(mfrow=c(2,3))
 
 # Elecciones 2002
-info_1 = plgsP[!is.na(plgsP$concentracionGP02) &  plgsP$concentracionGP02 < 0.20,]
-info_2 = plgsP[!is.na(plgsP$concentracionGP02) &  plgsP$concentracionGP02>= 0.20 & plgsP$concentracionGP02 < 0.40,]
-info_3 = plgsP[!is.na(plgsP$concentracionGP02) &  plgsP$concentracionGP02 >= 0.40 & plgsP$concentracionGP02 < 0.60,]
-info_4 = plgsP[!is.na(plgsP$concentracionGP02) &  plgsP$concentracionGP02 >= 0.60 & plgsP$concentracionGP02 < 0.80,]
-info_5 = plgsP[!is.na(plgsP$concentracionGP02) &  plgsP$concentracionGP02 >= 0.80,]
+info_1 = plgsP[!is.na(plgsP$concentracionGP1) & plgsP$concentracionGP1=="bajo",]
+info_2 = plgsP[!is.na(plgsP$concentracionGP1) & plgsP$concentracionGP1=="medio",]
+info_3 = plgsP[ !is.na(plgsP$concentracionGP1) & plgsP$concentracionGP1=="alto",]
 
 plot(peruframe, main="2002",cex.main=1.5,border=NA, col="lightgrey")
-plot(info_1,col='#fef0d9',lty=0,add = TRUE,border=NA)
-plot(info_2,col='#fdcc8a',lty=0,add = TRUE,border=NA)
-plot(info_3,col='#fc8d59',lty=0,add = TRUE,border=NA)
-plot(info_4,col='#e34a33',lty=0,add = TRUE,border=NA)
-plot(info_5,col='#b30000',lty=0,add = TRUE,border=NA)
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
 
 # Elecciones 2006
-info_1 = plgsP[!is.na(plgsP$concentracionGP06) &  plgsP$concentracionGP06 < 0.20,]
-info_2 = plgsP[!is.na(plgsP$concentracionGP06) &  plgsP$concentracionGP06>= 0.20 & plgsP$concentracionGP06 < 0.40,]
-info_3 = plgsP[!is.na(plgsP$concentracionGP06) &  plgsP$concentracionGP06 >= 0.40 & plgsP$concentracionGP06 < 0.60,]
-info_4 = plgsP[!is.na(plgsP$concentracionGP06) &  plgsP$concentracionGP06 >= 0.60 & plgsP$concentracionGP06 < 0.80,]
-info_5 = plgsP[!is.na(plgsP$concentracionGP06) &  plgsP$concentracionGP06 >= 0.80,]
+info_1 = plgsP[!is.na(plgsP$concentracionGP2) & plgsP$concentracionGP2=="bajo",]
+info_2 = plgsP[!is.na(plgsP$concentracionGP2) & plgsP$concentracionGP2=="medio",]
+info_3 = plgsP[ !is.na(plgsP$concentracionGP2) & plgsP$concentracionGP2=="alto",]
 
 plot(peruframe, main="2006",cex.main=1.5,border=NA, col="lightgrey")
-plot(info_1,col='#fef0d9',lty=0,add = TRUE,border=NA)
-plot(info_2,col='#fdcc8a',lty=0,add = TRUE,border=NA)
-plot(info_3,col='#fc8d59',lty=0,add = TRUE,border=NA)
-plot(info_4,col='#e34a33',lty=0,add = TRUE,border=NA)
-plot(info_5,col='#b30000',lty=0,add = TRUE,border=NA)
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
 
 # Elecciones 2010
-info_1 = plgsP[!is.na(plgsP$concentracionGP10) &  plgsP$concentracionGP10 < 0.20,]
-info_2 = plgsP[!is.na(plgsP$concentracionGP10) &  plgsP$concentracionGP10 >= 0.20 & plgsP$concentracionGP10 < 0.40,]
-info_3 = plgsP[!is.na(plgsP$concentracionGP10) &  plgsP$concentracionGP10 >= 0.40 & plgsP$concentracionGP10 < 0.60,]
-info_4 = plgsP[!is.na(plgsP$concentracionGP10) &  plgsP$concentracionGP10 >= 0.60 & plgsP$concentracionGP10 < 0.80,]
-info_5 = plgsP[!is.na(plgsP$concentracionGP10) &  plgsP$concentracionGP10 >= 0.80,]
+info_1 = plgsP[!is.na(plgsP$concentracionGP3) & plgsP$concentracionGP3=="bajo",]
+info_2 = plgsP[!is.na(plgsP$concentracionGP3) & plgsP$concentracionGP3=="medio",]
+info_3 = plgsP[ !is.na(plgsP$concentracionGP3) & plgsP$concentracionGP3=="alto",]
 
 plot(peruframe, main="2010",cex.main=1.5,border=NA, col="lightgrey")
-plot(info_1,col='#fef0d9',lty=0,add = TRUE,border=NA)
-plot(info_2,col='#fdcc8a',lty=0,add = TRUE,border=NA)
-plot(info_3,col='#fc8d59',lty=0,add = TRUE,border=NA)
-plot(info_4,col='#e34a33',lty=0,add = TRUE,border=NA)
-plot(info_5,col='#b30000',lty=0,add = TRUE,border=NA)
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
 
 # Elecciones 2014
-info_1 = plgsP[!is.na(plgsP$concentracionGP14) &  plgsP$concentracionGP14 < 0.20,]
-info_2 = plgsP[!is.na(plgsP$concentracionGP14) &  plgsP$concentracionGP14 >= 0.20 & plgsP$concentracionGP14 < 0.40,]
-info_3 = plgsP[!is.na(plgsP$concentracionGP14) &  plgsP$concentracionGP14 >= 0.40 & plgsP$concentracionGP14 < 0.60,]
-info_4 = plgsP[!is.na(plgsP$concentracionGP14) &  plgsP$concentracionGP14 >= 0.60 & plgsP$concentracionGP14 < 0.80,]
-info_5 = plgsP[!is.na(plgsP$concentracionGP14) &  plgsP$concentracionGP14 >= 0.80,]
+info_1 = plgsP[!is.na(plgsP$concentracionGP4) & plgsP$concentracionGP4=="bajo",]
+info_2 = plgsP[!is.na(plgsP$concentracionGP4) & plgsP$concentracionGP4=="medio",]
+info_3 = plgsP[ !is.na(plgsP$concentracionGP4) & plgsP$concentracionGP4=="alto",]
 
 plot(peruframe, main="2014",cex.main=1.5,border=NA, col="lightgrey")
-plot(info_1,col='#fef0d9',lty=0,add = TRUE,border=NA)
-plot(info_2,col='#fdcc8a',lty=0,add = TRUE,border=NA)
-plot(info_3,col='#fc8d59',lty=0,add = TRUE,border=NA)
-plot(info_4,col='#e34a33',lty=0,add = TRUE,border=NA)
-plot(info_5,col='#b30000',lty=0,add = TRUE,border=NA)
-
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
 
 # Elecciones 2018
-info_1 = plgsP[!is.na(plgsP$concentracionGP18) &  plgsP$concentracionGP18 < 0.20,]
-info_2 = plgsP[!is.na(plgsP$concentracionGP18) &  plgsP$concentracionGP18 >= 0.20 & plgsP$concentracionGP18 < 0.40,]
-info_3 = plgsP[!is.na(plgsP$concentracionGP18) &  plgsP$concentracionGP18 >= 0.40 & plgsP$concentracionGP18 < 0.60,]
-info_4 = plgsP[!is.na(plgsP$concentracionGP18) &  plgsP$concentracionGP18 >= 0.60 & plgsP$concentracionGP18 < 0.80,]
-info_5 = plgsP[!is.na(plgsP$concentracionGP18) &  plgsP$concentracionGP18 >= 0.80,]
+info_1 = plgsP[!is.na(plgsP$concentracionGP5) & plgsP$concentracionGP5=="bajo",]
+info_2 = plgsP[!is.na(plgsP$concentracionGP5) & plgsP$concentracionGP5=="medio",]
+info_3 = plgsP[ !is.na(plgsP$concentracionGP5) & plgsP$concentracionGP5=="alto",]
 
 plot(peruframe, main="2018",cex.main=1.5,border=NA, col="lightgrey")
-plot(info_1,col='#fef0d9',lty=0,add = TRUE,border=NA)
-plot(info_2,col='#fdcc8a',lty=0,add = TRUE,border=NA)
-plot(info_3,col='#fc8d59',lty=0,add = TRUE,border=NA)
-plot(info_4,col='#e34a33',lty=0,add = TRUE,border=NA)
-plot(info_5,col='#b30000',lty=0,add = TRUE,border=NA)
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
 
 # Elecciones leyenda
 
 plot(peruframe, col="white",border=NA)
 
-legend("center",title='concentracion',
-       legend=c("0.00 - 0.20", "0.20 - 0.40", "0.40 - 0.60", "0.60 - 0.80", "0.80 - 1.00"),
-       fill=c('#fef0d9','#fdcc8a',"#fc8d59", "#e34a33", "#b30000"),cex=1.2,bty = "n")
+legend("center",title='Concentracion',
+       legend=c("Bajo", "Medio", "Alto"),
+       fill=c('#ffeda0','#feb24c',"#f03b20"),cex=1.2,bty = "n")
 
 ```
 
+#### Ausentismo
+
+#### Elecciones Regionales 
+
+**Estadisticos descriptivos: Ausentismo a Nivel Regional**
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+vars=c("ausentesGR02",  "ausentesGR06", "ausentesGR10", "ausentesGR14", "ausentesGR18")
+
+v_mean <- lapply(data_regional[vars], mean, na.rm=TRUE)
+v_median <- lapply(data_regional[vars], median, na.rm=TRUE)
+v_sd <- lapply(data_regional[vars], sd, na.rm=TRUE)
+v_min <- lapply(data_regional[vars], min, na.rm=TRUE)
+v_max <- lapply(data_regional[vars], max, na.rm=TRUE)
+
+v_mean <- round(as.numeric(v_mean), 2)
+v_median <- round(as.numeric(v_median), 2)
+v_sd <- round(as.numeric(v_sd), 2)
+v_min <- round(as.numeric(v_min), 2)
+v_max <- round(as.numeric(v_max), 2)
+
+v_tab <- cbind(media=v_mean, mediana=v_median,sd=v_sd,min=v_min, max=v_max)
+row.names(v_tab) = c("2002", "2006", "2010", "2014", "2018")
+
+v_tab=as.data.frame(t(v_tab))
+
+kable(v_tab)  %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+**Evolución en el tiempo: Ausentismo a Nivel Regional**
+
+```{r echo=FALSE, fig.height=3.5,  message=FALSE, warning=FALSE}
+vars=c("ausentesGR02",  "ausentesGR06", "ausentesGR10", "ausentesGR14", "ausentesGR18")
+datareg2=datareg[vars]
+names(datareg2) = c("2002", "2006", "2010", "2014", "2018")
+
+datareg2=datareg2 %>% gather(Year, ausentes)
+
+ggplot(datareg2, aes(x=Year, y=ausentes)) + geom_boxplot(outlier.colour="black", outlier.shape=16,
+             outlier.size=2, notch=T,fill='steelblue') +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black"))+ labs( y="Nivel de Ausentismo (%)",x="") 
+```
+
+**Mapas Electorales: Ausentismo a Nivel Regional**
+
+```{r, eval=TRUE, echo=FALSE, fig.height=6, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
+library(maps)
+
+par(mfrow=c(2,3))
+
+# Elecciones 2002
+info_1 = plgsR[!is.na(plgsR$ausentesGR1) & plgsR$ausentesGR1=="bajo",]
+info_2 = plgsR[!is.na(plgsR$ausentesGR1) & plgsR$ausentesGR1=="medio",]
+info_3 = plgsR[!is.na(plgsR$ausentesGR1) & plgsR$ausentesGR1=="alto",]
+
+plot(peruframe, main="2002",cex.main=1.5,border=NA)
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones 2006
+info_1 = plgsR[!is.na(plgsR$ausentesGR2) & plgsR$ausentesGR2=="bajo",]
+info_2 = plgsR[!is.na(plgsR$ausentesGR2) & plgsR$ausentesGR2=="medio",]
+info_3 = plgsR[!is.na(plgsR$ausentesGR2) & plgsR$ausentesGR2=="alto",]
+
+plot(peruframe, main="2006",cex.main=1.5,border=NA)
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones 2010
+info_1 = plgsR[!is.na(plgsR$ausentesGR3) & plgsR$ausentesGR3=="bajo",]
+info_2 = plgsR[!is.na(plgsR$ausentesGR3) & plgsR$ausentesGR3=="medio",]
+info_3 = plgsR[!is.na(plgsR$ausentesGR3) & plgsR$ausentesGR3=="alto",]
+
+plot(peruframe, main="2010",cex.main=1.5,border=NA)
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones 2014
+info_1 = plgsR[!is.na(plgsR$ausentesGR4) & plgsR$ausentesGR4=="bajo",]
+info_2 = plgsR[!is.na(plgsR$ausentesGR4) & plgsR$ausentesGR4=="medio",]
+info_3 = plgsR[!is.na(plgsR$ausentesGR4) & plgsR$ausentesGR4=="alto",]
+
+plot(peruframe, main="2014",cex.main=1.5,border=NA)
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones 2018
+info_1 = plgsR[!is.na(plgsR$ausentesGR5) & plgsR$ausentesGR5=="bajo",]
+info_2 = plgsR[!is.na(plgsR$ausentesGR5) & plgsR$ausentesGR5=="medio",]
+info_3 = plgsR[!is.na(plgsR$ausentesGR5) & plgsR$ausentesGR5=="alto",]
+
+plot(peruframe, main="2018",cex.main=1.5,border=NA)
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones leyenda
+
+plot(peruframe, col="white",border=NA)
+
+legend("center",title='Ausentismo',
+       legend=c("Bajo", "Medio", "Alto"),
+       fill=c('#ffeda0','#feb24c',"#f03b20"),cex=1.2,bty = "n")
+
+```
+
+
+#### Elecciones Provinciales 
+
+**Estadisticos descriptivos: Ausentismo a Nivel Provincial**
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+vars=c("ausentesGP02",  "ausentesGP06", "ausentesGP10", "ausentesGP14", "ausentesGP18")
+
+v_mean <- lapply(data_provincial[vars], mean, na.rm=TRUE)
+v_median <- lapply(data_provincial[vars], median, na.rm=TRUE)
+v_sd <- lapply(data_provincial[vars], sd, na.rm=TRUE)
+v_min <- lapply(data_provincial[vars], min, na.rm=TRUE)
+v_max <- lapply(data_provincial[vars], max, na.rm=TRUE)
+
+v_mean <- round(as.numeric(v_mean), 2)
+v_median <- round(as.numeric(v_median), 2)
+v_sd <- round(as.numeric(v_sd), 2)
+v_min <- round(as.numeric(v_min), 2)
+v_max <- round(as.numeric(v_max), 2)
+
+v_tab <- cbind(media=v_mean, mediana=v_median,sd=v_sd,min=v_min, max=v_max)
+row.names(v_tab) = c("2002", "2006", "2010", "2014", "2018")
+
+v_tab=as.data.frame(t(v_tab))
+
+kable(v_tab)  %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+**Evolución en el tiempo: Ausentismo a Nivel Provincial**
+
+```{r echo=FALSE, fig.height=3.5,  message=FALSE, warning=FALSE}
+vars=c("ausentesGP02",  "ausentesGP06", "ausentesGP10", "ausentesGP14", "ausentesGP18")
+dataprov2=dataprov[vars]
+names(dataprov2) = c("2002", "2006", "2010", "2014", "2018")
+
+dataprov2=dataprov2 %>% gather(Year, ausentes)
+
+ggplot(dataprov2, aes(x=Year, y=ausentes)) + geom_boxplot(outlier.colour="black", outlier.shape=16,
+             outlier.size=2, notch=T,fill='steelblue') +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black"))+ labs( y="Nivel de Ausentismo (%)",x="") 
+```
+
+**Mapas Electorales: Ausentismo a Nivel Provincial**
+
+```{r, eval=TRUE, echo=FALSE, fig.height=6, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
+library(maps)
+
+par(mfrow=c(2,3))
+
+# Elecciones 2002
+info_1 = plgsP[!is.na(plgsP$ausentesGP1) & plgsP$ausentesGP1=="bajo",]
+info_2 = plgsP[!is.na(plgsP$ausentesGP1) & plgsP$ausentesGP1=="medio",]
+info_3 = plgsP[ !is.na(plgsP$ausentesGP1) & plgsP$ausentesGP1=="alto",]
+
+plot(peruframe, main="2002",cex.main=1.5,border=NA, col="lightgrey")
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones 2006
+info_1 = plgsP[!is.na(plgsP$ausentesGP2) & plgsP$ausentesGP2=="bajo",]
+info_2 = plgsP[!is.na(plgsP$ausentesGP2) & plgsP$ausentesGP2=="medio",]
+info_3 = plgsP[ !is.na(plgsP$ausentesGP2) & plgsP$ausentesGP2=="alto",]
+
+plot(peruframe, main="2006",cex.main=1.5,border=NA, col="lightgrey")
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones 2010
+info_1 = plgsP[!is.na(plgsP$ausentesGP3) & plgsP$ausentesGP3=="bajo",]
+info_2 = plgsP[!is.na(plgsP$ausentesGP3) & plgsP$ausentesGP3=="medio",]
+info_3 = plgsP[ !is.na(plgsP$ausentesGP3) & plgsP$ausentesGP3=="alto",]
+
+plot(peruframe, main="2010",cex.main=1.5,border=NA, col="lightgrey")
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones 2014
+info_1 = plgsP[!is.na(plgsP$ausentesGP4) & plgsP$ausentesGP4=="bajo",]
+info_2 = plgsP[!is.na(plgsP$ausentesGP4) & plgsP$ausentesGP4=="medio",]
+info_3 = plgsP[ !is.na(plgsP$ausentesGP4) & plgsP$ausentesGP4=="alto",]
+
+plot(peruframe, main="2014",cex.main=1.5,border=NA, col="lightgrey")
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones 2018
+info_1 = plgsP[!is.na(plgsP$ausentesGP5) & plgsP$ausentesGP5=="bajo",]
+info_2 = plgsP[!is.na(plgsP$ausentesGP5) & plgsP$ausentesGP5=="medio",]
+info_3 = plgsP[ !is.na(plgsP$ausentesGP5) & plgsP$ausentesGP5=="alto",]
+
+plot(peruframe, main="2018",cex.main=1.5,border=NA, col="lightgrey")
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones leyenda
+
+plot(peruframe, col="white",border=NA)
+
+legend("center",title='Ausentismo',
+       legend=c("Bajo", "Medio", "Alto"),
+       fill=c('#ffeda0','#feb24c',"#f03b20"),cex=1.2,bty = "n")
+
+```
 
 ------
 
