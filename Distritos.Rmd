@@ -32,7 +32,8 @@ data_distrital18 = data_distrital18 %>%
   mutate(ausentesGL18 = electoresGL18 - emitidosGL18, 
          por_ausentesGL18 = (ausentesGL18/electoresGL18)*100)
 
-
+data_distrital18[is.infinite(data_distrital18$por_ausentesGL18),]$por_ausentesGL18 = NA 
+data_distrital18[is.nan(data_distrital18$por_ausentesGL18),]$por_ausentesGL18 = NA  
 ```
 
 Votos blancos + nulos
@@ -106,12 +107,26 @@ Calculo concentración:
 
 ```{r}
 data_distrital18 = data_distrital18 %>% mutate(concentracionGL18 = primeroGL18/validosGL18 + segundoGL18/validosGL18)
+
+data_distrital18[is.nan(data_distrital18$concentracionGL18),]$concentracionGL18 = NA 
+
+data_distrital18[data_distrital18$validosGL18==0,]$concentracionGL18 = NA 
+
+data_distrital18$concentracionGL18= ifelse(data_distrital18$concentracionGL18 >= 1, NA, data_distrital18$concentracionGL18)
+
+data_distrital18$concentracionGL18= ifelse(data_distrital18$concentracionGL18 == 0, NA, data_distrital18$concentracionGL18)
 ```
 
 Calculo competitividad:
 
 ```{r}
 data_distrital18 = data_distrital18 %>% mutate(competitividadGL18 = primeroGL18/validosGL18 - segundoGL18/validosGL18)
+
+data_distrital18[is.nan(data_distrital18$competitividadGL18),]$competitividadGL18 = NA 
+
+data_distrital18[data_distrital18$validosGL18==0,]$competitividadGL18 = NA 
+
+data_distrital18$competitividadGL18= ifelse(data_distrital18$competitividadGL18 >= 1, NA, data_distrital18$competitividadGL18)
 ```
 
 ###### NEP Y Herfindahl
@@ -132,7 +147,10 @@ NEP y Herfindahl por distrito:
 NEP = ganadoresGL %>% group_by(TXUBIGEO) %>% 
   summarise(NEPGL18 = 1/sum(prop_votos2, na.rm = T))
 
-data_distrital18 = left_join(data_distrital18, NEP, by="TXUBIGEO") #join 
+data_distrital18 = left_join(data_distrital18, NEP, by="TXUBIGEO")
+#join
+
+data_distrital18[is.infinite(data_distrital18$NEPGL18),]$NEPGL18 = NA  
 ```
 
 
@@ -234,14 +252,21 @@ Calculo concentración:
 
 ```{r}
 data_distrital14 = data_distrital14 %>% mutate(concentracionGL14 = primeroGL14/validosGL14 + segundoGL14/validosGL14)
+
+data_distrital14[is.nan(data_distrital14$concentracionGL14),]$concentracionGL14 = NA 
+
+data_distrital14[!is.na(data_distrital14$validosGL14) &data_distrital14$validosGL14==0,]$concentracionGL14 = NA 
 ```
 
 Calculo competitividad:
 
 ```{r}
 data_distrital14 = data_distrital14 %>% mutate(competitividadGL14 = primeroGL14/validosGL14 - segundoGL14/validosGL14)
-```
 
+data_distrital14[is.nan(data_distrital14$competitividadGL14),]$competitividadGL14 = NA 
+
+data_distrital14[!is.na(data_distrital14$validosGL14) &data_distrital14$validosGL14==0,]$competitividadGL14 = NA 
+```
 
 ###### NEP Y Herfindahl
 
@@ -266,6 +291,8 @@ data_distrital14 = left_join(data_distrital14, NEP, by="TXUBIGEO") #join
 
 #cuidar casos sin votos validos
 data_distrital14[!is.na(data_distrital14$validosGL14) &data_distrital14$validosGL14==0,]$NEPGL14 = NA 
+
+data_distrital14[is.infinite(data_distrital14$NEPGL14),]$NEPGL14 = NA  
 ```
 
 ## 2010
@@ -326,7 +353,6 @@ data_distrital10[!is.na(data_distrital10$validosGL10) &data_distrital10$validosG
 data_distrital10[!is.na(data_distrital10$validosGL10) &data_distrital10$validosGL10==0,]$por_blancosnulosGL10 = NA 
 ```
 
-
 ```{r}
 dataGL102 = dataGL10[!dataGL10$NOM_ORGPOLITICA == "VOTOS EN BLANCO",]
 dataGL102 = dataGL102[!dataGL102$NOM_ORGPOLITICA == "VOTOS NULOS",]
@@ -363,6 +389,9 @@ data_distrital10 = data_distrital10 %>% mutate(concentracionGL10 = primeroGL10/v
 
 #cuidar casos sin votos validos
 data_distrital10$concentracionGL10[is.nan(data_distrital10$concentracionGL10)] = NA 
+data_distrital10$concentracionGL10[is.infinite(data_distrital10$concentracionGL10)] = NA
+
+data_distrital10[data_distrital10$validosGL10==0,]$concentracionGL10 = NA
 ```
 
 Calculo competitividad:
@@ -372,6 +401,9 @@ data_distrital10 = data_distrital10 %>% mutate(competitividadGL10 = primeroGL10/
 
 #cuidar casos sin votos validos
 data_distrital10$competitividadGL10[is.nan(data_distrital10$competitividadGL10)] = NA 
+
+data_distrital10$competitividadGL10[is.infinite(data_distrital10$competitividadGL10)] = NA 
+data_distrital10[data_distrital10$validosGL10==0,]$competitividadGL10 = NA
 ```
 
 ###### NEP Y Herfindahl
@@ -392,6 +424,9 @@ data_distrital10 = left_join(data_distrital10, NEP, by="UBIGEO") #join
 
 #cuidar casos sin votos validos
 data_distrital10$NEPGL10[is.infinite(data_distrital10$NEPGL10)] = NA 
+data_distrital10$NEPGL10[is.nan(data_distrital10$NEPGL10)] = NA
+
+data_distrital10[data_distrital10$validosGL10==0,]$NEPGL10 = NA
 ```
 
 ## 2006
@@ -421,6 +456,9 @@ Calcular ausentes:
 data_distrital06 = data_distrital06 %>% 
   mutate(ausentesGL06= electoresGL06 - emitidosGL06, 
          por_ausentesGL06 = (ausentesGL06/electoresGL06)*100)
+
+data_distrital06$por_ausentesGL06[is.infinite(data_distrital06$por_ausentesGL06)] = NA 
+data_distrital06$por_ausentesGL06[is.nan(data_distrital06$por_ausentesGL06)] = NA
 ```
 
 votos validos:
@@ -485,6 +523,10 @@ data_distrital06 = data_distrital06 %>% mutate(concentracionGL06 = primeroGL06/v
 
 #cuidar casos sin votos validos
 data_distrital06$concentracionGL06[is.nan(data_distrital06$concentracionGL06)] = NA 
+data_distrital06$concentracionGL06[is.infinite(data_distrital06$concentracionGL06)] = NA 
+
+#cuidar casos sin votos validos
+data_distrital06[!is.na(data_distrital06$validosGL06) &data_distrital06$validosGL06==0,]$concentracionGL06 = NA 
 ```
 
 Calculo competitividad:
@@ -494,6 +536,10 @@ data_distrital06 = data_distrital06 %>% mutate(competitividadGL06 = primeroGL06/
 
 #cuidar casos sin votos validos
 data_distrital06$competitividadGL06[is.nan(data_distrital06$competitividadGL06)] = NA 
+data_distrital06$competitividadGL06[is.infinite(data_distrital06$competitividadGL06)] = NA 
+
+#cuidar casos sin votos validos
+data_distrital06[!is.na(data_distrital06$validosGL06) &data_distrital06$validosGL06==0,]$competitividadGL06 = NA 
 ```
 
 
@@ -517,6 +563,9 @@ NEP = ganadoresGL %>% group_by(Ubigeo) %>%
   summarise(NEPGL06 = 1/sum(prop_votos2, na.rm = T))
 
 data_distrital06 = left_join(data_distrital06, NEP, by="Ubigeo") #join 
+
+data_distrital06$NEPGL06[is.nan(data_distrital06$NEPGL06)] = NA 
+data_distrital06$NEPGL06[is.infinite(data_distrital06$NEPGL06)] = NA 
 
 #cuidar casos sin votos validos
 data_distrital06[!is.na(data_distrital06$validosGL06) &data_distrital06$validosGL06==0,]$NEPGL06 = NA 
@@ -547,6 +596,9 @@ Calcular ausentes:
 data_distrital02 = data_distrital02 %>% 
   mutate(ausentesGL02= electoresGL02 - emitidosGL02, 
          por_ausentesGL02 = (ausentesGL02/electoresGL02)*100)
+
+data_distrital02$por_ausentesGL02[is.nan(data_distrital02$por_ausentesGL02)] = NA 
+data_distrital02$por_ausentesGL02[is.infinite(data_distrital02$por_ausentesGL02)] = NA 
 ```
 
 votos validos:
@@ -606,6 +658,10 @@ data_distrital02 = data_distrital02 %>% mutate(concentracionGL02 = primeroGL02/v
 
 #cuidar casos sin votos validos
 data_distrital02$concentracionGL02[is.nan(data_distrital02$concentracionGL02)] = NA 
+data_distrital02$concentracionGL02[is.infinite(data_distrital02$concentracionGL02)] = NA 
+
+#cuidar casos sin votos validos
+data_distrital02[!is.na(data_distrital02$validosGL02) &data_distrital02$validosGL02==0,]$concentracionGL02 = NA 
 ```
 
 Calculo competitividad:
@@ -615,6 +671,10 @@ data_distrital02 = data_distrital02 %>% mutate(competitividadGL02 = primeroGL02/
 
 #cuidar casos sin votos validos
 data_distrital02$competitividadGL02[is.nan(data_distrital02$competitividadGL02)] = NA 
+data_distrital02$competitividadGL02[is.infinite(data_distrital02$competitividadGL02)] = NA 
+
+#cuidar casos sin votos validos
+data_distrital02[!is.na(data_distrital02$validosGL02) &data_distrital02$validosGL02==0,]$competitividadGL02 = NA 
 ```
 
 ###### NEP Y Herfindahl
@@ -634,6 +694,10 @@ NEP = dataGL02 %>% group_by(UBIGEO) %>%
 data_distrital02 = left_join(data_distrital02, NEP, by="UBIGEO") #join 
 #cuidar casos sin votos validos
 data_distrital02$NEPGL02[is.infinite(data_distrital02$NEPGL02)] = NA 
+data_distrital02$NEPGL02[is.nan(data_distrital02$NEPGL02)] = NA 
+
+#cuidar casos sin votos validos
+data_distrital02[!is.na(data_distrital02$validosGL02) &data_distrital02$validosGL02==0,]$NEPGL02 = NA 
 ```
 
 

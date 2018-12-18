@@ -128,7 +128,8 @@ El presente proyecto analiza la dimensión electoral de la política subnacional
 
   * [Fragmentación Electoral](#D0)
   * [Indicador de Competitividad](#D1)
-  * [Indicador de Fragmentación](#D2)
+  * [Indicador de Concentración](#D2)
+  * [Ausentismo](#D3)
 
 ### Fragmentación Electoral
 
@@ -181,7 +182,7 @@ ggplot(datareg2, aes(x=Year, y=NEP)) + geom_boxplot(outlier.colour="black", outl
 
 **Mapas Electorales: Indicador de Fragmentación Electoral (NEP) en las Elecciones Regionales**
 
-```{r, eval=TRUE, echo=FALSE, fig.height=5, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r, eval=TRUE, echo=FALSE, fig.height=6, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
 library(maps)
 
 par(mfrow=c(2,3))
@@ -291,7 +292,7 @@ ggplot(dataprov2, aes(x=Year, y=NEP)) + geom_boxplot(outlier.colour="black", out
 
 **Mapas Electorales: Indicador de Fragmentación Electoral (NEP) en las Elecciones Provinciales**
 
-```{r, eval=TRUE, echo=FALSE, fig.height=5, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r, eval=TRUE, echo=FALSE, fig.height=6, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
 library(maps)
 
 par(mfrow=c(2,3))
@@ -393,14 +394,14 @@ names(datadist2) = c("2002", "2006", "2010", "2014", "2018")
 
 datadist2=datadist2 %>% gather(Year, NEP)
 
-gGLlot(datadist2, aes(x=Year, y=NEP)) + geom_boxplot(outlier.colour="black", outlier.shape=16,
+ggplot(datadist2, aes(x=Year, y=NEP)) + geom_boxplot(outlier.colour="black", outlier.shape=16,
              outlier.size=2, notch=T,fill='steelblue') +
     	    theme(panel.background=element_rect(fill = "white", colour = "black"))+ labs( y="Nivel de Fragmentacion Politica",x="") 
 ```
 
 **Mapas Electorales: Indicador de Fragmentación Electoral (NEP) en las Elecciones Distritales**
 
-```{r, eval=TRUE, echo=FALSE, fig.height=5, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r, eval=TRUE, echo=FALSE, fig.height=6, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
 library(maps)
 
 par(mfrow=c(2,3))
@@ -467,6 +468,8 @@ legend("center",title='NEP',
 
 #### Análisis de Competitividad
 
+<a id='D1'></a> 
+
 El concepto de competitividad electoral alude a la distancia que se ha producido entre los partidos, organizaciones o candidatos que ocuparon el primer y el segundo lugar en un determinado proceso electoral. Por lo tanto el indicador comúnmente usado para medir el grado de competitividad registra la diferencia en la proporción de votos válidos emitidos entre las opciones electorales que quedaron en primer y segundo lugar.
 
 #### Elecciones Regionales 
@@ -513,7 +516,7 @@ ggplot(datareg2, aes(x=Year, y=competitividad)) + geom_boxplot(outlier.colour="b
 
 **Mapas Electorales: Indicador de Competitividad en las Elecciones Regionales**
 
-```{r, eval=TRUE, echo=FALSE, fig.height=5, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r, eval=TRUE, echo=FALSE, fig.height=6, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
 library(maps)
 
 par(mfrow=c(2,3))
@@ -623,7 +626,7 @@ ggplot(dataprov2, aes(x=Year, y=competitividad)) + geom_boxplot(outlier.colour="
 
 **Mapas Electorales: Indicador de Competitividad en las Elecciones Provinciales**
 
-```{r, eval=TRUE, echo=FALSE, fig.height=5, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r, eval=TRUE, echo=FALSE, fig.height=6, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
 library(maps)
 
 par(mfrow=c(2,3))
@@ -688,13 +691,125 @@ legend("center",title='Competitividad',
 
 ```
 
+
+#### Elecciones Distritales 
+
+**Estadisticos descriptivos: Indicador de Competitividad en las Elecciones Distritales**
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+vars=c("competitividadGL02",  "competitividadGL06", "competitividadGL10", "competitividadGL14", "competitividadGL18")
+
+v_mean <- lapply(data_distrital[vars], mean, na.rm=TRUE)
+v_median <- lapply(data_distrital[vars], median, na.rm=TRUE)
+v_sd <- lapply(data_distrital[vars], sd, na.rm=TRUE)
+v_min <- lapply(data_distrital[vars], min, na.rm=TRUE)
+v_max <- lapply(data_distrital[vars], max, na.rm=TRUE)
+
+v_mean <- round(as.numeric(v_mean), 2)
+v_median <- round(as.numeric(v_median), 2)
+v_sd <- round(as.numeric(v_sd), 2)
+v_min <- round(as.numeric(v_min), 2)
+v_max <- round(as.numeric(v_max), 2)
+
+v_tab <- cbind(media=v_mean, mediana=v_median,sd=v_sd,min=v_min, max=v_max)
+row.names(v_tab) = c("2002", "2006", "2010", "2014", "2018")
+
+v_tab=as.data.frame(t(v_tab))
+
+kable(v_tab)  %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+**Evolución en el tiempo: Indicador de Competitividad en las Elecciones Distritales**
+
+```{r echo=FALSE, fig.height=2.5,  message=FALSE, warning=FALSE}
+vars=c("competitividadGL02",  "competitividadGL06", "competitividadGL10", "competitividadGL14", "competitividadGL18")
+datadist2=datadist[vars]
+names(datadist2) = c("2002", "2006", "2010", "2014", "2018")
+
+datadist2=datadist2 %>% gather(Year, competitividad)
+
+ggplot(datadist2, aes(x=Year, y=competitividad)) + geom_boxplot(outlier.colour="black", outlier.shape=16,
+             outlier.size=2, notch=T,fill='steelblue') +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black"))+ labs( y="Nivel de Competitividad Politica",x="") 
+```
+
+**Mapas Electorales: Indicador de Competitividad en las Elecciones Distritales**
+
+```{r, eval=TRUE, echo=FALSE, fig.height=6, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
+library(maps)
+
+par(mfrow=c(2,3))
+
+# Elecciones 2002
+info_1 = plgsD[!is.na(plgsD$competitividadGL1) & plgsD$competitividadGL1=="bajo",]
+info_2 = plgsD[!is.na(plgsD$competitividadGL1) & plgsD$competitividadGL1=="medio",]
+info_3 = plgsD[ !is.na(plgsD$competitividadGL1) & plgsD$competitividadGL1=="alto",]
+
+plot(peruframe, main="2002",cex.main=1.5,border=NA, col="lightgrey")
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones 2006
+info_1 = plgsD[!is.na(plgsD$competitividadGL2) & plgsD$competitividadGL2=="bajo",]
+info_2 = plgsD[!is.na(plgsD$competitividadGL2) & plgsD$competitividadGL2=="medio",]
+info_3 = plgsD[ !is.na(plgsD$competitividadGL2) & plgsD$competitividadGL2=="alto",]
+
+plot(peruframe, main="2006",cex.main=1.5,border=NA, col="lightgrey")
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones 2010
+info_1 = plgsD[!is.na(plgsD$competitividadGL3) & plgsD$competitividadGL3=="bajo",]
+info_2 = plgsD[!is.na(plgsD$competitividadGL3) & plgsD$competitividadGL3=="medio",]
+info_3 = plgsD[ !is.na(plgsD$competitividadGL3) & plgsD$competitividadGL3=="alto",]
+
+plot(peruframe, main="2010",cex.main=1.5,border=NA, col="lightgrey")
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones 2014
+info_1 = plgsD[!is.na(plgsD$competitividadGL4) & plgsD$competitividadGL4=="bajo",]
+info_2 = plgsD[!is.na(plgsD$competitividadGL4) & plgsD$competitividadGL4=="medio",]
+info_3 = plgsD[ !is.na(plgsD$competitividadGL4) & plgsD$competitividadGL4=="alto",]
+
+plot(peruframe, main="2014",cex.main=1.5,border=NA, col="lightgrey")
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones 2018
+info_1 = plgsD[!is.na(plgsD$competitividadGL5) & plgsD$competitividadGL5=="bajo",]
+info_2 = plgsD[!is.na(plgsD$competitividadGL5) & plgsD$competitividadGL5=="medio",]
+info_3 = plgsD[ !is.na(plgsD$competitividadGL5) & plgsD$competitividadGL5=="alto",]
+
+plot(peruframe, main="2018",cex.main=1.5,border=NA, col="lightgrey")
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones leyenda
+
+plot(peruframe, col="white",border=NA)
+
+legend("center",title='Competitividad',
+       legend=c("Bajo", "Medio", "Alto"),
+       fill=c('#ffeda0','#feb24c',"#f03b20"),cex=1.2,bty = "n")
+
+```
+
 #### Análisis de Concentración
+
+<a id='D2'></a> 
 
 El concepto de concentración electoral alude a la capacidad que tuvieron las dos opciones electorales más votadas para atraer las preferencias electorales. El indicador de concentración electoral más comúnmente usado registra valores que van en un rango de 0 a 1, donde 0 corresponde al mínimo y 1 al máximo de la concentración electoral.
 
 #### Elecciones Regionales 
 
-**Estadisticos descriptivos: Indicador de Concentracion en las Elecciones Regionales**
+**Estadisticos descriptivos: Indicador de Concentración en las Elecciones Regionales**
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 vars=c("concentracionGR02",  "concentracionGR06", "concentracionGR10", "concentracionGR14", "concentracionGR18")
@@ -720,7 +835,7 @@ kable(v_tab)  %>%
   kable_styling(bootstrap_options = c("striped", "hover"))
 ```
 
-**Evolución en el tiempo: Indicador de Concentración Electoral (concentracion) en las Elecciones Regionales**
+**Evolución en el tiempo: Indicador de Concentración Electoral en las Elecciones Regionales**
 
 ```{r echo=FALSE, fig.height=2.5,  message=FALSE, warning=FALSE}
 vars=c("concentracionGR02",  "concentracionGR06", "concentracionGR10", "concentracionGR14", "concentracionGR18")
@@ -734,9 +849,9 @@ ggplot(datareg2, aes(x=Year, y=concentracion)) + geom_boxplot(outlier.colour="bl
     	    theme(panel.background=element_rect(fill = "white", colour = "black"))+ labs( y="Nivel de Concentracion Politica",x="") 
 ```
 
-**Mapas Electorales: Indicador de Concentracion en las Elecciones Regionales**
+**Mapas Electorales: Indicador de Concentración en las Elecciones Regionales**
 
-```{r, eval=TRUE, echo=FALSE, fig.height=5, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r, eval=TRUE, echo=FALSE, fig.height=6, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
 library(maps)
 
 par(mfrow=c(2,3))
@@ -803,7 +918,7 @@ legend("center",title='Concentracion',
 
 #### Elecciones Provinciales 
 
-**Estadisticos descriptivos: Indicador de Concentracion en las Elecciones Provinciales**
+**Estadisticos descriptivos: Indicador de Concentración en las Elecciones Provinciales**
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 vars=c("concentracionGP02",  "concentracionGP06", "concentracionGP10", "concentracionGP14", "concentracionGP18")
@@ -829,7 +944,7 @@ kable(v_tab)  %>%
   kable_styling(bootstrap_options = c("striped", "hover"))
 ```
 
-**Evolución en el tiempo: Indicador de concentracion en las Elecciones Provinciales**
+**Evolución en el tiempo: Indicador de Concentración en las Elecciones Provinciales**
 
 ```{r echo=FALSE, fig.height=2.5,  message=FALSE, warning=FALSE}
 vars=c("concentracionGP02",  "concentracionGP06", "concentracionGP10", "concentracionGP14", "concentracionGP18")
@@ -843,9 +958,9 @@ ggplot(dataprov2, aes(x=Year, y=concentracion)) + geom_boxplot(outlier.colour="b
     	    theme(panel.background=element_rect(fill = "white", colour = "black"))+ labs( y="Nivel de Concentracion Politica",x="") 
 ```
 
-**Mapas Electorales: Indicador de concentracion en las Elecciones Provinciales**
+**Mapas Electorales: Indicador de Concentración en las Elecciones Provinciales**
 
-```{r, eval=TRUE, echo=FALSE, fig.height=5, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r, eval=TRUE, echo=FALSE, fig.height=6, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
 library(maps)
 
 par(mfrow=c(2,3))
@@ -910,7 +1025,119 @@ legend("center",title='Concentracion',
 
 ```
 
+
+#### Elecciones Distritales 
+
+**Estadisticos descriptivos: Indicador de Concentración en las Elecciones Distritales**
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+vars=c("concentracionGL02",  "concentracionGL06", "concentracionGL10", "concentracionGL14", "concentracionGL18")
+
+v_mean <- lapply(data_distrital[vars], mean, na.rm=TRUE)
+v_median <- lapply(data_distrital[vars], median, na.rm=TRUE)
+v_sd <- lapply(data_distrital[vars], sd, na.rm=TRUE)
+v_min <- lapply(data_distrital[vars], min, na.rm=TRUE)
+v_max <- lapply(data_distrital[vars], max, na.rm=TRUE)
+
+v_mean <- round(as.numeric(v_mean), 2)
+v_median <- round(as.numeric(v_median), 2)
+v_sd <- round(as.numeric(v_sd), 2)
+v_min <- round(as.numeric(v_min), 2)
+v_max <- round(as.numeric(v_max), 2)
+
+v_tab <- cbind(media=v_mean, mediana=v_median,sd=v_sd,min=v_min, max=v_max)
+row.names(v_tab) = c("2002", "2006", "2010", "2014", "2018")
+
+v_tab=as.data.frame(t(v_tab))
+
+kable(v_tab)  %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+**Evolución en el tiempo: Indicador de Concentración en las Elecciones Distritales**
+
+```{r echo=FALSE, fig.height=2.5,  message=FALSE, warning=FALSE}
+vars=c("concentracionGL02",  "concentracionGL06", "concentracionGL10", "concentracionGL14", "concentracionGL18")
+datadist2=datadist[vars]
+names(datadist2) = c("2002", "2006", "2010", "2014", "2018")
+
+datadist2=datadist2 %>% gather(Year, concentracion)
+
+ggplot(datadist2, aes(x=Year, y=concentracion)) + geom_boxplot(outlier.colour="black", outlier.shape=16,
+             outlier.size=2, notch=T,fill='steelblue') +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black"))+ labs( y="Nivel de Concentracion Politica",x="") 
+```
+
+**Mapas Electorales: Indicador de Concentración en las Elecciones Distritales**
+
+```{r, eval=TRUE, echo=FALSE, fig.height=6, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
+library(maps)
+
+par(mfrow=c(2,3))
+
+# Elecciones 2002
+info_1 = plgsD[!is.na(plgsD$concentracionGL1) & plgsD$concentracionGL1=="bajo",]
+info_2 = plgsD[!is.na(plgsD$concentracionGL1) & plgsD$concentracionGL1=="medio",]
+info_3 = plgsD[ !is.na(plgsD$concentracionGL1) & plgsD$concentracionGL1=="alto",]
+
+plot(peruframe, main="2002",cex.main=1.5,border=NA, col="lightgrey")
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones 2006
+info_1 = plgsD[!is.na(plgsD$concentracionGL2) & plgsD$concentracionGL2=="bajo",]
+info_2 = plgsD[!is.na(plgsD$concentracionGL2) & plgsD$concentracionGL2=="medio",]
+info_3 = plgsD[ !is.na(plgsD$concentracionGL2) & plgsD$concentracionGL2=="alto",]
+
+plot(peruframe, main="2006",cex.main=1.5,border=NA, col="lightgrey")
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones 2010
+info_1 = plgsD[!is.na(plgsD$concentracionGL3) & plgsD$concentracionGL3=="bajo",]
+info_2 = plgsD[!is.na(plgsD$concentracionGL3) & plgsD$concentracionGL3=="medio",]
+info_3 = plgsD[ !is.na(plgsD$concentracionGL3) & plgsD$concentracionGL3=="alto",]
+
+plot(peruframe, main="2010",cex.main=1.5,border=NA, col="lightgrey")
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones 2014
+info_1 = plgsD[!is.na(plgsD$concentracionGL4) & plgsD$concentracionGL4=="bajo",]
+info_2 = plgsD[!is.na(plgsD$concentracionGL4) & plgsD$concentracionGL4=="medio",]
+info_3 = plgsD[ !is.na(plgsD$concentracionGL4) & plgsD$concentracionGL4=="alto",]
+
+plot(peruframe, main="2014",cex.main=1.5,border=NA, col="lightgrey")
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones 2018
+info_1 = plgsD[!is.na(plgsD$concentracionGL5) & plgsD$concentracionGL5=="bajo",]
+info_2 = plgsD[!is.na(plgsD$concentracionGL5) & plgsD$concentracionGL5=="medio",]
+info_3 = plgsD[ !is.na(plgsD$concentracionGL5) & plgsD$concentracionGL5=="alto",]
+
+plot(peruframe, main="2018",cex.main=1.5,border=NA, col="lightgrey")
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones leyenda
+
+plot(peruframe, col="white",border=NA)
+
+legend("center",title='Concentracion',
+       legend=c("Bajo", "Medio", "Alto"),
+       fill=c('#ffeda0','#feb24c',"#f03b20"),cex=1.2,bty = "n")
+
+```
+
 #### Ausentismo
+
+<a id='D3'></a> 
 
 #### Elecciones Regionales 
 
@@ -956,7 +1183,7 @@ ggplot(datareg2, aes(x=Year, y=ausentes)) + geom_boxplot(outlier.colour="black",
 
 **Mapas Electorales: Ausentismo a Nivel Regional**
 
-```{r, eval=TRUE, echo=FALSE, fig.height=5, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r, eval=TRUE, echo=FALSE, fig.height=6, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
 library(maps)
 
 par(mfrow=c(2,3))
@@ -1066,7 +1293,7 @@ ggplot(dataprov2, aes(x=Year, y=ausentes)) + geom_boxplot(outlier.colour="black"
 
 **Mapas Electorales: Ausentismo a Nivel Provincial**
 
-```{r, eval=TRUE, echo=FALSE, fig.height=5, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r, eval=TRUE, echo=FALSE, fig.height=6, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
 library(maps)
 
 par(mfrow=c(2,3))
@@ -1115,6 +1342,115 @@ plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
 info_1 = plgsP[!is.na(plgsP$ausentesGP5) & plgsP$ausentesGP5=="bajo",]
 info_2 = plgsP[!is.na(plgsP$ausentesGP5) & plgsP$ausentesGP5=="medio",]
 info_3 = plgsP[ !is.na(plgsP$ausentesGP5) & plgsP$ausentesGP5=="alto",]
+
+plot(peruframe, main="2018",cex.main=1.5,border=NA, col="lightgrey")
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones leyenda
+
+plot(peruframe, col="white",border=NA)
+
+legend("center",title='Ausentismo',
+       legend=c("Bajo", "Medio", "Alto"),
+       fill=c('#ffeda0','#feb24c',"#f03b20"),cex=1.2,bty = "n")
+
+```
+
+#### Elecciones Distritales 
+
+**Estadisticos descriptivos: Ausentismo a Nivel Distrital**
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+vars=c("por_ausentesGL02",  "por_ausentesGL06", "por_ausentesGL10", "por_ausentesGL14", "por_ausentesGL18")
+
+v_mean <- lapply(data_distrital[vars], mean, na.rm=TRUE)
+v_median <- lapply(data_distrital[vars], median, na.rm=TRUE)
+v_sd <- lapply(data_distrital[vars], sd, na.rm=TRUE)
+v_min <- lapply(data_distrital[vars], min, na.rm=TRUE)
+v_max <- lapply(data_distrital[vars], max, na.rm=TRUE)
+
+v_mean <- round(as.numeric(v_mean), 2)
+v_median <- round(as.numeric(v_median), 2)
+v_sd <- round(as.numeric(v_sd), 2)
+v_min <- round(as.numeric(v_min), 2)
+v_max <- round(as.numeric(v_max), 2)
+
+v_tab <- cbind(media=v_mean, mediana=v_median,sd=v_sd,min=v_min, max=v_max)
+row.names(v_tab) = c("2002", "2006", "2010", "2014", "2018")
+
+v_tab=as.data.frame(t(v_tab))
+
+kable(v_tab)  %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+**Evolución en el tiempo: Ausentismo a Nivel Distrital**
+
+```{r echo=FALSE, fig.height=2.5,  message=FALSE, warning=FALSE}
+vars=c("por_ausentesGL02",  "por_ausentesGL06", "por_ausentesGL10", "por_ausentesGL14", "por_ausentesGL18")
+datadist2=datadist[vars]
+names(datadist2) = c("2002", "2006", "2010", "2014", "2018")
+
+datadist2=datadist2 %>% gather(Year, ausentes)
+
+ggplot(datadist2, aes(x=Year, y=ausentes)) + geom_boxplot(outlier.colour="black", outlier.shape=16,
+             outlier.size=2, notch=T,fill='steelblue') +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black"))+ labs( y="Nivel de Ausentismo (%)",x="") 
+```
+
+**Mapas Electorales: Ausentismo a Nivel Distrital**
+
+```{r, eval=TRUE, echo=FALSE, fig.height=6, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
+library(maps)
+
+par(mfrow=c(2,3))
+
+# Elecciones 2002
+info_1 = plgsD[!is.na(plgsD$ausentesGL1) & plgsD$ausentesGL1=="bajo",]
+info_2 = plgsD[!is.na(plgsD$ausentesGL1) & plgsD$ausentesGL1=="medio",]
+info_3 = plgsD[ !is.na(plgsD$ausentesGL1) & plgsD$ausentesGL1=="alto",]
+
+plot(peruframe, main="2002",cex.main=1.5,border=NA, col="lightgrey")
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones 2006
+info_1 = plgsD[!is.na(plgsD$ausentesGL2) & plgsD$ausentesGL2=="bajo",]
+info_2 = plgsD[!is.na(plgsD$ausentesGL2) & plgsD$ausentesGL2=="medio",]
+info_3 = plgsD[ !is.na(plgsD$ausentesGL2) & plgsD$ausentesGL2=="alto",]
+
+plot(peruframe, main="2006",cex.main=1.5,border=NA, col="lightgrey")
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones 2010
+info_1 = plgsD[!is.na(plgsD$ausentesGL3) & plgsD$ausentesGL3=="bajo",]
+info_2 = plgsD[!is.na(plgsD$ausentesGL3) & plgsD$ausentesGL3=="medio",]
+info_3 = plgsD[ !is.na(plgsD$ausentesGL3) & plgsD$ausentesGL3=="alto",]
+
+plot(peruframe, main="2010",cex.main=1.5,border=NA, col="lightgrey")
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones 2014
+info_1 = plgsD[!is.na(plgsD$ausentesGL4) & plgsD$ausentesGL4=="bajo",]
+info_2 = plgsD[!is.na(plgsD$ausentesGL4) & plgsD$ausentesGL4=="medio",]
+info_3 = plgsD[ !is.na(plgsD$ausentesGL4) & plgsD$ausentesGL4=="alto",]
+
+plot(peruframe, main="2014",cex.main=1.5,border=NA, col="lightgrey")
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones 2018
+info_1 = plgsD[!is.na(plgsD$ausentesGL5) & plgsD$ausentesGL5=="bajo",]
+info_2 = plgsD[!is.na(plgsD$ausentesGL5) & plgsD$ausentesGL5=="medio",]
+info_3 = plgsD[ !is.na(plgsD$ausentesGL5) & plgsD$ausentesGL5=="alto",]
 
 plot(peruframe, main="2018",cex.main=1.5,border=NA, col="lightgrey")
 plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
