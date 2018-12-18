@@ -91,6 +91,39 @@ plgsP=rgdal::readOGR("PROVINCIA_16_03_2015.shp")
 plgsP  <- merge(plgsP, dataprov, by="ID") 
 ```
 
+```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+load("data_distrital.Rda")
+datadist=as.data.frame(data_distrital)
+
+is.na(datadist)=sapply(datadist, is.infinite)
+
+gruposCantidad=3
+etiquetas1=c('bajo','medio','alto')
+
+datadist[c("NEPGL1", "NEPGL2", "NEPGL3", "NEPGL4", "NEPGL5")]=lapply(datadist[c("NEPGL02", "NEPGL06", "NEPGL10", "NEPGL14", "NEPGL18")],cut,
+       breaks = gruposCantidad,
+       labels = etiquetas1,
+       ordered_result = T)
+
+datadist[c("concentracionGL1", "concentracionGL2", "concentracionGL3", "concentracionGL4", "concentracionGL5")]=lapply(datadist[c("concentracionGL02", "concentracionGL06", "concentracionGL10", "concentracionGL14", "concentracionGL18")],cut,
+       breaks = gruposCantidad,
+       labels = etiquetas1,
+       ordered_result = T)
+
+datadist[c("competitividadGL1", "competitividadGL2", "competitividadGL3", "competitividadGL4", "competitividadGL5")]=lapply(datadist[c("competitividadGL02", "competitividadGL06", "competitividadGL10", "competitividadGL14", "competitividadGL18")],cut,
+       breaks = gruposCantidad,
+       labels = etiquetas1,
+       ordered_result = T)
+
+datadist[c("ausentesGL1", "ausentesGL2", "ausentesGL3", "ausentesGL4", "ausentesGL5")]=lapply(datadist[c("por_ausentesGL02", "por_ausentesGL06", "por_ausentesGL10", "por_ausentesGL14", "por_ausentesGL18")],cut,
+       breaks = gruposCantidad,
+       labels = etiquetas1,
+       ordered_result = T)
+
+plgsD=rgdal::readOGR("DISTRITO_16_03_2015.shp")
+plgsD  <- merge(plgsD, datadist, by="ID") 
+```
+
 El presente proyecto analiza la dimensión electoral de la política subnacional en el Perú. A partir del análisis de tres indicadores políticos, se buscan identificar los principales cambios y continuidades de la dinámica subnacional del país. Se contruye a partir del trabajo de Aragón (2010). 
 
   * [Fragmentación Electoral](#D0)
@@ -134,7 +167,7 @@ kable(v_tab)  %>%
 
 **Evolución en el tiempo: Indicador de Fragmentación Electoral (NEP) en las Elecciones Regionales**
 
-```{r echo=FALSE, fig.height=3.5,  message=FALSE, warning=FALSE}
+```{r echo=FALSE, fig.height=2.5,  message=FALSE, warning=FALSE}
 vars=c("NEPGR02",  "NEPGR06", "NEPGR10", "NEPGR14", "NEPGR18")
 datareg2=datareg[vars]
 names(datareg2) = c("2002", "2006", "2010", "2014", "2018")
@@ -148,7 +181,7 @@ ggplot(datareg2, aes(x=Year, y=NEP)) + geom_boxplot(outlier.colour="black", outl
 
 **Mapas Electorales: Indicador de Fragmentación Electoral (NEP) en las Elecciones Regionales**
 
-```{r, eval=TRUE, echo=FALSE, fig.height=6, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r, eval=TRUE, echo=FALSE, fig.height=5, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
 library(maps)
 
 par(mfrow=c(2,3))
@@ -244,7 +277,7 @@ kable(v_tab)  %>%
 
 **Evolución en el tiempo: Indicador de Fragmentación Electoral (NEP) en las Elecciones Provinciales**
 
-```{r echo=FALSE, fig.height=3.5,  message=FALSE, warning=FALSE}
+```{r echo=FALSE, fig.height=2.5,  message=FALSE, warning=FALSE}
 vars=c("NEPGP02",  "NEPGP06", "NEPGP10", "NEPGP14", "NEPGP18")
 dataprov2=dataprov[vars]
 names(dataprov2) = c("2002", "2006", "2010", "2014", "2018")
@@ -258,7 +291,7 @@ ggplot(dataprov2, aes(x=Year, y=NEP)) + geom_boxplot(outlier.colour="black", out
 
 **Mapas Electorales: Indicador de Fragmentación Electoral (NEP) en las Elecciones Provinciales**
 
-```{r, eval=TRUE, echo=FALSE, fig.height=6, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r, eval=TRUE, echo=FALSE, fig.height=5, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
 library(maps)
 
 par(mfrow=c(2,3))
@@ -323,6 +356,115 @@ legend("center",title='NEP',
 
 ```
 
+#### Elecciones Distritales 
+
+**Estadisticos descriptivos: Indicador de Fragmentación Electoral (NEP) en las Elecciones Distritales**
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+vars=c("NEPGL02",  "NEPGL06", "NEPGL10", "NEPGL14", "NEPGL18")
+
+v_mean <- lapply(data_distrital[vars], mean, na.rm=TRUE)
+v_median <- lapply(data_distrital[vars], median, na.rm=TRUE)
+v_sd <- lapply(data_distrital[vars], sd, na.rm=TRUE)
+v_min <- lapply(data_distrital[vars], min, na.rm=TRUE)
+v_max <- lapply(data_distrital[vars], max, na.rm=TRUE)
+
+v_mean <- round(as.numeric(v_mean), 2)
+v_median <- round(as.numeric(v_median), 2)
+v_sd <- round(as.numeric(v_sd), 2)
+v_min <- round(as.numeric(v_min), 2)
+v_max <- round(as.numeric(v_max), 2)
+
+v_tab <- cbind(media=v_mean, mediana=v_median,sd=v_sd,min=v_min, max=v_max)
+row.names(v_tab) = c("2002", "2006", "2010", "2014", "2018")
+
+v_tab=as.data.frame(t(v_tab))
+
+kable(v_tab)  %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+**Evolución en el tiempo: Indicador de Fragmentación Electoral (NEP) en las Elecciones Distritales**
+
+```{r echo=FALSE, fig.height=2.5,  message=FALSE, warning=FALSE}
+vars=c("NEPGL02",  "NEPGL06", "NEPGL10", "NEPGL14", "NEPGL18")
+datadist2=datadist[vars]
+names(datadist2) = c("2002", "2006", "2010", "2014", "2018")
+
+datadist2=datadist2 %>% gather(Year, NEP)
+
+gGLlot(datadist2, aes(x=Year, y=NEP)) + geom_boxplot(outlier.colour="black", outlier.shape=16,
+             outlier.size=2, notch=T,fill='steelblue') +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black"))+ labs( y="Nivel de Fragmentacion Politica",x="") 
+```
+
+**Mapas Electorales: Indicador de Fragmentación Electoral (NEP) en las Elecciones Distritales**
+
+```{r, eval=TRUE, echo=FALSE, fig.height=5, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
+library(maps)
+
+par(mfrow=c(2,3))
+
+# Elecciones 2002
+info_1 = plgsD[!is.na(plgsD$NEPGL1) & plgsD$NEPGL1=="bajo",]
+info_2 = plgsD[!is.na(plgsD$NEPGL1) & plgsD$NEPGL1=="medio",]
+info_3 = plgsD[ !is.na(plgsD$NEPGL1) & plgsD$NEPGL1=="alto",]
+
+plot(peruframe, main="2002",cex.main=1.5,border=NA, col="lightgrey")
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones 2006
+info_1 = plgsD[!is.na(plgsD$NEPGL2) & plgsD$NEPGL2=="bajo",]
+info_2 = plgsD[!is.na(plgsD$NEPGL2) & plgsD$NEPGL2=="medio",]
+info_3 = plgsD[ !is.na(plgsD$NEPGL2) & plgsD$NEPGL2=="alto",]
+
+plot(peruframe, main="2006",cex.main=1.5,border=NA, col="lightgrey")
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones 2010
+info_1 = plgsD[!is.na(plgsD$NEPGL3) & plgsD$NEPGL3=="bajo",]
+info_2 = plgsD[!is.na(plgsD$NEPGL3) & plgsD$NEPGL3=="medio",]
+info_3 = plgsD[ !is.na(plgsD$NEPGL3) & plgsD$NEPGL3=="alto",]
+
+plot(peruframe, main="2010",cex.main=1.5,border=NA, col="lightgrey")
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones 2014
+info_1 = plgsD[!is.na(plgsD$NEPGL4) & plgsD$NEPGL4=="bajo",]
+info_2 = plgsD[!is.na(plgsD$NEPGL4) & plgsD$NEPGL4=="medio",]
+info_3 = plgsD[ !is.na(plgsD$NEPGL4) & plgsD$NEPGL4=="alto",]
+
+plot(peruframe, main="2014",cex.main=1.5,border=NA, col="lightgrey")
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones 2018
+info_1 = plgsD[!is.na(plgsD$NEPGL5) & plgsD$NEPGL5=="bajo",]
+info_2 = plgsD[!is.na(plgsD$NEPGL5) & plgsD$NEPGL5=="medio",]
+info_3 = plgsD[ !is.na(plgsD$NEPGL5) & plgsD$NEPGL5=="alto",]
+
+plot(peruframe, main="2018",cex.main=1.5,border=NA, col="lightgrey")
+plot(info_1,col='#ffeda0',lty=0,add = TRUE,border=NA)
+plot(info_2,col='#feb24c',lty=0,add = TRUE,border=NA)
+plot(info_3,col='#f03b20',lty=0,add = TRUE,border=NA)
+
+# Elecciones leyenda
+
+plot(peruframe, col="white",border=NA)
+
+legend("center",title='NEP',
+       legend=c("Bajo", "Medio", "Alto"),
+       fill=c('#ffeda0','#feb24c',"#f03b20"),cex=1.2,bty = "n")
+
+```
+
 #### Análisis de Competitividad
 
 El concepto de competitividad electoral alude a la distancia que se ha producido entre los partidos, organizaciones o candidatos que ocuparon el primer y el segundo lugar en un determinado proceso electoral. Por lo tanto el indicador comúnmente usado para medir el grado de competitividad registra la diferencia en la proporción de votos válidos emitidos entre las opciones electorales que quedaron en primer y segundo lugar.
@@ -355,9 +497,9 @@ kable(v_tab)  %>%
   kable_styling(bootstrap_options = c("striped", "hover"))
 ```
 
-**Evolución en el tiempo: Indicador de Fragmentación Electoral (competitividad) en las Elecciones Regionales**
+**Evolución en el tiempo: Indicador de Competitividad en las Elecciones Regionales**
 
-```{r echo=FALSE, fig.height=3.5,  message=FALSE, warning=FALSE}
+```{r echo=FALSE, fig.height=2.5,  message=FALSE, warning=FALSE}
 vars=c("competitividadGR02",  "competitividadGR06", "competitividadGR10", "competitividadGR14", "competitividadGR18")
 datareg2=datareg[vars]
 names(datareg2) = c("2002", "2006", "2010", "2014", "2018")
@@ -371,7 +513,7 @@ ggplot(datareg2, aes(x=Year, y=competitividad)) + geom_boxplot(outlier.colour="b
 
 **Mapas Electorales: Indicador de Competitividad en las Elecciones Regionales**
 
-```{r, eval=TRUE, echo=FALSE, fig.height=6, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r, eval=TRUE, echo=FALSE, fig.height=5, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
 library(maps)
 
 par(mfrow=c(2,3))
@@ -467,7 +609,7 @@ kable(v_tab)  %>%
 
 **Evolución en el tiempo: Indicador de Competitividad en las Elecciones Provinciales**
 
-```{r echo=FALSE, fig.height=3.5,  message=FALSE, warning=FALSE}
+```{r echo=FALSE, fig.height=2.5,  message=FALSE, warning=FALSE}
 vars=c("competitividadGP02",  "competitividadGP06", "competitividadGP10", "competitividadGP14", "competitividadGP18")
 dataprov2=dataprov[vars]
 names(dataprov2) = c("2002", "2006", "2010", "2014", "2018")
@@ -481,7 +623,7 @@ ggplot(dataprov2, aes(x=Year, y=competitividad)) + geom_boxplot(outlier.colour="
 
 **Mapas Electorales: Indicador de Competitividad en las Elecciones Provinciales**
 
-```{r, eval=TRUE, echo=FALSE, fig.height=6, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r, eval=TRUE, echo=FALSE, fig.height=5, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
 library(maps)
 
 par(mfrow=c(2,3))
@@ -580,7 +722,7 @@ kable(v_tab)  %>%
 
 **Evolución en el tiempo: Indicador de Concentración Electoral (concentracion) en las Elecciones Regionales**
 
-```{r echo=FALSE, fig.height=3.5,  message=FALSE, warning=FALSE}
+```{r echo=FALSE, fig.height=2.5,  message=FALSE, warning=FALSE}
 vars=c("concentracionGR02",  "concentracionGR06", "concentracionGR10", "concentracionGR14", "concentracionGR18")
 datareg2=datareg[vars]
 names(datareg2) = c("2002", "2006", "2010", "2014", "2018")
@@ -594,7 +736,7 @@ ggplot(datareg2, aes(x=Year, y=concentracion)) + geom_boxplot(outlier.colour="bl
 
 **Mapas Electorales: Indicador de Concentracion en las Elecciones Regionales**
 
-```{r, eval=TRUE, echo=FALSE, fig.height=6, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r, eval=TRUE, echo=FALSE, fig.height=5, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
 library(maps)
 
 par(mfrow=c(2,3))
@@ -659,7 +801,6 @@ legend("center",title='Concentracion',
 
 ```
 
-
 #### Elecciones Provinciales 
 
 **Estadisticos descriptivos: Indicador de Concentracion en las Elecciones Provinciales**
@@ -690,7 +831,7 @@ kable(v_tab)  %>%
 
 **Evolución en el tiempo: Indicador de concentracion en las Elecciones Provinciales**
 
-```{r echo=FALSE, fig.height=3.5,  message=FALSE, warning=FALSE}
+```{r echo=FALSE, fig.height=2.5,  message=FALSE, warning=FALSE}
 vars=c("concentracionGP02",  "concentracionGP06", "concentracionGP10", "concentracionGP14", "concentracionGP18")
 dataprov2=dataprov[vars]
 names(dataprov2) = c("2002", "2006", "2010", "2014", "2018")
@@ -704,7 +845,7 @@ ggplot(dataprov2, aes(x=Year, y=concentracion)) + geom_boxplot(outlier.colour="b
 
 **Mapas Electorales: Indicador de concentracion en las Elecciones Provinciales**
 
-```{r, eval=TRUE, echo=FALSE, fig.height=6, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r, eval=TRUE, echo=FALSE, fig.height=5, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
 library(maps)
 
 par(mfrow=c(2,3))
@@ -776,7 +917,7 @@ legend("center",title='Concentracion',
 **Estadisticos descriptivos: Ausentismo a Nivel Regional**
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
-vars=c("ausentesGR02",  "ausentesGR06", "ausentesGR10", "ausentesGR14", "ausentesGR18")
+vars=c("por_ausentesGR02",  "por_ausentesGR06", "por_ausentesGR10", "por_ausentesGR14", "por_ausentesGR18")
 
 v_mean <- lapply(data_regional[vars], mean, na.rm=TRUE)
 v_median <- lapply(data_regional[vars], median, na.rm=TRUE)
@@ -801,8 +942,8 @@ kable(v_tab)  %>%
 
 **Evolución en el tiempo: Ausentismo a Nivel Regional**
 
-```{r echo=FALSE, fig.height=3.5,  message=FALSE, warning=FALSE}
-vars=c("ausentesGR02",  "ausentesGR06", "ausentesGR10", "ausentesGR14", "ausentesGR18")
+```{r echo=FALSE, fig.height=2.5,  message=FALSE, warning=FALSE}
+vars=c("por_ausentesGR02",  "por_ausentesGR06", "por_ausentesGR10", "por_ausentesGR14", "por_ausentesGR18")
 datareg2=datareg[vars]
 names(datareg2) = c("2002", "2006", "2010", "2014", "2018")
 
@@ -815,7 +956,7 @@ ggplot(datareg2, aes(x=Year, y=ausentes)) + geom_boxplot(outlier.colour="black",
 
 **Mapas Electorales: Ausentismo a Nivel Regional**
 
-```{r, eval=TRUE, echo=FALSE, fig.height=6, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r, eval=TRUE, echo=FALSE, fig.height=5, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
 library(maps)
 
 par(mfrow=c(2,3))
@@ -886,7 +1027,7 @@ legend("center",title='Ausentismo',
 **Estadisticos descriptivos: Ausentismo a Nivel Provincial**
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
-vars=c("ausentesGP02",  "ausentesGP06", "ausentesGP10", "ausentesGP14", "ausentesGP18")
+vars=c("por_ausentesGP02",  "por_ausentesGP06", "por_ausentesGP10", "por_ausentesGP14", "por_ausentesGP18")
 
 v_mean <- lapply(data_provincial[vars], mean, na.rm=TRUE)
 v_median <- lapply(data_provincial[vars], median, na.rm=TRUE)
@@ -911,8 +1052,8 @@ kable(v_tab)  %>%
 
 **Evolución en el tiempo: Ausentismo a Nivel Provincial**
 
-```{r echo=FALSE, fig.height=3.5,  message=FALSE, warning=FALSE}
-vars=c("ausentesGP02",  "ausentesGP06", "ausentesGP10", "ausentesGP14", "ausentesGP18")
+```{r echo=FALSE, fig.height=2.5,  message=FALSE, warning=FALSE}
+vars=c("por_ausentesGP02",  "por_ausentesGP06", "por_ausentesGP10", "por_ausentesGP14", "por_ausentesGP18")
 dataprov2=dataprov[vars]
 names(dataprov2) = c("2002", "2006", "2010", "2014", "2018")
 
@@ -925,7 +1066,7 @@ ggplot(dataprov2, aes(x=Year, y=ausentes)) + geom_boxplot(outlier.colour="black"
 
 **Mapas Electorales: Ausentismo a Nivel Provincial**
 
-```{r, eval=TRUE, echo=FALSE, fig.height=6, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r, eval=TRUE, echo=FALSE, fig.height=5, fig.show='hold', fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
 library(maps)
 
 par(mfrow=c(2,3))

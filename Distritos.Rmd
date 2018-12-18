@@ -12,7 +12,7 @@ dataGL18=read_xlsx("TablaDistrital2018.xlsx")
 ```{r}
 electores = dataGL18 %>% 
             group_by(TXUBIGEO) %>% #seleccionar una fila por distrito
-           summarise(electoresGL18 = max(ELECTORES, na.rm = T)) 
+           summarise(electoresGL18 = max(as.numeric(ELECTORES), na.rm = T)) 
 ```
 
 Votos emitidos por distritos:
@@ -20,16 +20,19 @@ Votos emitidos por distritos:
 ```{r}
 emitidos = dataGL18 %>% 
             group_by(TXUBIGEO) %>% #seleccionar una fila por distrito
-           summarise(emitidosGL18 = sum(VOTOS))
-data_finalGL18 = left_join(electores, emitidos, by="TXUBIGEO")
+           summarise(emitidosGL18 = max(as.numeric(EMITIDOS_TOTAL), na.rm = T)) 
+
+data_distrital18 = left_join(electores, emitidos, by="TXUBIGEO") #join
 ```
 
 Calcular ausentes: 
 
 ```{r}
-data_finalGL18 = data_finalGL18 %>% 
+data_distrital18 = data_distrital18 %>% 
   mutate(ausentesGL18 = electoresGL18 - emitidosGL18, 
          por_ausentesGL18 = (ausentesGL18/electoresGL18)*100)
+
+
 ```
 
 Votos blancos + nulos
@@ -37,28 +40,31 @@ Votos blancos + nulos
 ```{r}
 blancos_nulos = dataGL18 %>% filter(TXORGPOL == "VOTOS EN BLANCO" | TXORGPOL =="VOTOS NULOS" ) %>%
                 group_by(TXUBIGEO) %>% 
-                summarise(blancosnulosGL18 = sum(VOTOS, na.rm = T)) 
+                summarise(blancosnulosGL18 = sum(as.numeric(VOTOS), na.rm = T)) 
 
-data_finalGL18 = left_join(data_finalGL18, blancos_nulos, by="TXUBIGEO") #join
+data_distrital18 = left_join(data_distrital18, blancos_nulos, by="TXUBIGEO") #join
 
-data_finalGL18  = data_finalGL18 %>% 
+data_distrital18  = data_distrital18 %>% 
           mutate (por_blancosnulosGL18 = (blancosnulosGL18/emitidosGL18)*100) 
+
+
 ```
 
 votos validos:
 
 ```{r}
-data_finalGL18  = data_finalGL18 %>% 
-          mutate (validosGL18 = emitidosGL18-blancosnulosGL18) 
+validos = dataGL18 %>% 
+            group_by(TXUBIGEO) %>% #seleccionar una fila por distrito
+           summarise(validosGL18 = max(as.numeric(VALIDOS_TOTAL), na.rm = T)) 
+
+data_distrital18 = left_join(data_distrital18, validos, by="TXUBIGEO") #join
 ```
 
 ```{r}
 #cuidar casos sin votos validos
-data_finalGL18[data_finalGL18$validosGL18==0,]$por_blancosnulosGL18 = NA 
-data_finalGL18[data_finalGL18$validosGL18==0,]$por_ausentesGL18 = NA 
-
+data_distrital18[data_distrital18$validosGL18==0,]$por_blancosnulosGL18 = NA 
+data_distrital18[is.infinite(data_distrital18$validosGL18),]$por_blancosnulosGL18 = NA 
 ```
-
 
 ###Indicadores políticos 
 
@@ -74,45 +80,44 @@ dataGL182 = dataGL182[!dataGL182$TXORGPOL == "VOTOS EN BLANCO",]
 
 
 ```{r}
-ganadoresGL =dataGL182 %>% group_by(TXUBIGEO,TXORGPOL) %>% summarise(votos = sum(VOTOS, na.rm = T))  %>% mutate(ganadorGL18 = TXORGPOL)
+ganadoresGL =dataGL182 %>% group_by(TXUBIGEO,TXORGPOL) %>% summarise(votos = sum(as.numeric(VOTOS), na.rm = T))  %>% mutate(ganadorGL18 = TXORGPOL)
 ```
 
 ```{r}
 ganadoresGL = ganadoresGL [order(ganadoresGL$TXUBIGEO, -ganadoresGL$votos),] 
 ```
 
-
 Votos ganador
 ```{r}
 primero = ganadoresGL %>% group_by(TXUBIGEO) %>% filter(row_number()==1) %>% mutate(primeroGL18=votos)
 
-data_finalGL18 = left_join(data_finalGL18, primero[c(1,5)], by="TXUBIGEO") #join 
+data_distrital18 = left_join(data_distrital18, primero[c(1,5)], by="TXUBIGEO") #join 
 ```
 
 Votos segundo
 ```{r}
 segundo = ganadoresGL %>% group_by(TXUBIGEO) %>% filter(row_number()==2) %>% mutate(segundoGL18=votos)
 
-data_finalGL18 = left_join(data_finalGL18, segundo[c(1,5)], by="TXUBIGEO") #join 
+data_distrital18 = left_join(data_distrital18, segundo[c(1,5)], by="TXUBIGEO") #join 
 ```
 
 
 Calculo concentración:
 
 ```{r}
-data_finalGL18 = data_finalGL18 %>% mutate(concentracionGL18 = primeroGL18/validosGL18 + segundoGL18/validosGL18)
+data_distrital18 = data_distrital18 %>% mutate(concentracionGL18 = primeroGL18/validosGL18 + segundoGL18/validosGL18)
 ```
 
 Calculo competitividad:
 
 ```{r}
-data_finalGL18 = data_finalGL18 %>% mutate(competitividadGL18 = primeroGL18/validosGL18 - segundoGL18/validosGL18)
+data_distrital18 = data_distrital18 %>% mutate(competitividadGL18 = primeroGL18/validosGL18 - segundoGL18/validosGL18)
 ```
 
 ###### NEP Y Herfindahl
 
 ```{r}
-ganadoresGL = left_join(ganadoresGL, data_finalGL18[c(1,8)], by="TXUBIGEO") #join 
+ganadoresGL = left_join(ganadoresGL, data_distrital18[c(1,8)], by="TXUBIGEO") #join 
 ```
 
 Calcular proporción de votos validos 
@@ -127,7 +132,7 @@ NEP y Herfindahl por distrito:
 NEP = ganadoresGL %>% group_by(TXUBIGEO) %>% 
   summarise(NEPGL18 = 1/sum(prop_votos2, na.rm = T))
 
-data_finalGL18 = left_join(data_finalGL18, NEP, by="TXUBIGEO") #join 
+data_distrital18 = left_join(data_distrital18, NEP, by="TXUBIGEO") #join 
 ```
 
 
@@ -149,17 +154,17 @@ Votos emitidos por distritos:
 emitidos = dataGL14 %>% group_by(TXUBIGEO) %>% 
            summarise(emitidosGL14 = sum(VOTOS, na.rm = T))
 
-data_finalGL14 = left_join(electores, emitidos, by="TXUBIGEO") #join
+data_distrital14 = left_join(electores, emitidos, by="TXUBIGEO") #join
 
 #ciudar que los que tienen 0 en votos emitidos sean NA
-data_finalGL14[data_finalGL14$emitidosGL14==0,]$emitidosGL14 = NA
+data_distrital14[data_distrital14$emitidosGL14==0,]$emitidosGL14 = NA
 ```
 
 
 Calcular ausentes: 
 
 ```{r}
-data_finalGL14 = data_finalGL14 %>% 
+data_distrital14 = data_distrital14 %>% 
   mutate(ausentesGL14= electoresGL14 - emitidosGL14, 
          por_ausentesGL14 = (ausentesGL14/electoresGL14)*100)
 ```
@@ -170,24 +175,24 @@ Votos blancos + nulos
 blancos_nulos = dataGL14 %>% filter(TXORGPOL == "VOTOS EN BLANCO" | TXORGPOL =="VOTOS NULOS" ) %>% group_by(TXUBIGEO) %>% 
                 summarise(blancosnulosGL14 = sum(VOTOS, na.rm = T)) 
 
-data_finalGL14 = left_join(data_finalGL14, blancos_nulos, by="TXUBIGEO") #join
+data_distrital14 = left_join(data_distrital14, blancos_nulos, by="TXUBIGEO") #join
 
-data_finalGL14  = data_finalGL14 %>% 
+data_distrital14  = data_distrital14 %>% 
           mutate (por_blancosnulosGL14 = (blancosnulosGL14/emitidosGL14)*100) 
 ```
 
 votos validos:
 
 ```{r}
-data_finalGL14  = data_finalGL14 %>% 
+data_distrital14  = data_distrital14 %>% 
           mutate (validosGL14 = emitidosGL14-blancosnulosGL14) 
 ```
 
 ```{r}
 #cuidar casos sin votos validos
-data_finalGL14[!is.na(data_finalGL14$validosGL14) &data_finalGL14$validosGL14==0,]$por_ausentesGL14 = NA 
+data_distrital14[!is.na(data_distrital14$validosGL14) &data_distrital14$validosGL14==0,]$por_ausentesGL14 = NA 
 
-data_finalGL14[!is.na(data_finalGL14$validosGL14) &data_finalGL14$validosGL14==0,]$por_blancosnulosGL14 = NA 
+data_distrital14[!is.na(data_distrital14$validosGL14) &data_distrital14$validosGL14==0,]$por_blancosnulosGL14 = NA 
 ```
 
 
@@ -214,27 +219,27 @@ Votos ganador
 ```{r}
 primero = ganadoresGL %>% group_by(TXUBIGEO) %>% filter(row_number()==1) %>% mutate(primeroGL14=votos)
 
-data_finalGL14 = left_join(data_finalGL14, primero[c(1,5)], by="TXUBIGEO") #join 
+data_distrital14 = left_join(data_distrital14, primero[c(1,5)], by="TXUBIGEO") #join 
 ```
 
 Votos segundo
 ```{r}
 segundo = ganadoresGL %>% group_by(TXUBIGEO) %>% filter(row_number()==2) %>% mutate(segundoGL14=votos)
 
-data_finalGL14 = left_join(data_finalGL14, segundo[c(1,5)], by="TXUBIGEO") #join 
+data_distrital14 = left_join(data_distrital14, segundo[c(1,5)], by="TXUBIGEO") #join 
 ```
 
 
 Calculo concentración:
 
 ```{r}
-data_finalGL14 = data_finalGL14 %>% mutate(concentracionGL14 = primeroGL14/validosGL14 + segundoGL14/validosGL14)
+data_distrital14 = data_distrital14 %>% mutate(concentracionGL14 = primeroGL14/validosGL14 + segundoGL14/validosGL14)
 ```
 
 Calculo competitividad:
 
 ```{r}
-data_finalGL14 = data_finalGL14 %>% mutate(competitividadGL14 = primeroGL14/validosGL14 - segundoGL14/validosGL14)
+data_distrital14 = data_distrital14 %>% mutate(competitividadGL14 = primeroGL14/validosGL14 - segundoGL14/validosGL14)
 ```
 
 
@@ -243,7 +248,7 @@ data_finalGL14 = data_finalGL14 %>% mutate(competitividadGL14 = primeroGL14/vali
 Nep:
 
 ```{r}
-ganadoresGL = left_join(ganadoresGL, data_finalGL14[c(1,8)], by="TXUBIGEO") #join 
+ganadoresGL = left_join(ganadoresGL, data_distrital14[c(1,8)], by="TXUBIGEO") #join 
 ```
 
 Calcular proporción de votos validos al cuadrado
@@ -257,10 +262,10 @@ NEP:
 NEP = ganadoresGL %>% group_by(TXUBIGEO) %>% 
   summarise(NEPGL14 = 1/sum(prop_votos2, na.rm = T))
 
-data_finalGL14 = left_join(data_finalGL14, NEP, by="TXUBIGEO") #join 
+data_distrital14 = left_join(data_distrital14, NEP, by="TXUBIGEO") #join 
 
 #cuidar casos sin votos validos
-data_finalGL14[!is.na(data_finalGL14$validosGL14) &data_finalGL14$validosGL14==0,]$NEPGL14 = NA 
+data_distrital14[!is.na(data_distrital14$validosGL14) &data_distrital14$validosGL14==0,]$NEPGL14 = NA 
 ```
 
 ## 2010
@@ -282,14 +287,14 @@ Votos emitidos por distritos:
 emitidos = dataGL10 %>% group_by(UBIGEO) %>% 
            summarise(emitidosGL10 = max(NUM_VOTOS_EMITIDOS, na.rm = T)) 
 
-data_finalGL10 = left_join(electores, emitidos, by="UBIGEO") #join
+data_distrital10 = left_join(electores, emitidos, by="UBIGEO") #join
 ```
 
 
 Calcular ausentes: 
 
 ```{r}
-data_finalGL10 = data_finalGL10 %>% 
+data_distrital10 = data_distrital10 %>% 
   mutate(ausentesGL10= electoresGL10 - emitidosGL10, 
          por_ausentesGL10 = (ausentesGL10/electoresGL10)*100)
 ```
@@ -301,7 +306,7 @@ validos = dataGL10 %>%
             group_by(UBIGEO) %>% #seleccionar una fila por distrito
            summarise(validosGL10 = sum(NUM_VOTOS_ORGPOL, na.rm = T)) 
 
-data_finalGL10 = left_join(data_finalGL10, validos, by="UBIGEO") #join
+data_distrital10 = left_join(data_distrital10, validos, by="UBIGEO") #join
 
 #Ojo, tengo casos con 0 votos validos.. estoy asumiento que esos son blancos y nulos
 ```
@@ -309,16 +314,16 @@ data_finalGL10 = left_join(data_finalGL10, validos, by="UBIGEO") #join
 Votos blancos + nulos
 
 ```{r}
-data_finalGL10 = data_finalGL10 %>% 
+data_distrital10 = data_distrital10 %>% 
   mutate(blancosnulosGL10 = emitidosGL10 - validosGL10, 
          por_blancosnulosGL10 = (blancosnulosGL10/emitidosGL10)*100)
 ```
 
 ```{r}
 #cuidar casos sin votos validos
-data_finalGL10[!is.na(data_finalGL10$validosGL10) &data_finalGL10$validosGL10==0,]$por_ausentesGL10 = NA 
+data_distrital10[!is.na(data_distrital10$validosGL10) &data_distrital10$validosGL10==0,]$por_ausentesGL10 = NA 
 
-data_finalGL10[!is.na(data_finalGL10$validosGL10) &data_finalGL10$validosGL10==0,]$por_blancosnulosGL10 = NA 
+data_distrital10[!is.na(data_distrital10$validosGL10) &data_distrital10$validosGL10==0,]$por_blancosnulosGL10 = NA 
 ```
 
 
@@ -340,33 +345,33 @@ Votos ganador
 ```{r}
 primero = ganadoresGL %>% group_by(UBIGEO) %>% filter(row_number()==1) %>% mutate(primeroGL10=votos)
 
-data_finalGL10 = left_join(data_finalGL10, primero[c(1,5)], by="UBIGEO") #join 
+data_distrital10 = left_join(data_distrital10, primero[c(1,5)], by="UBIGEO") #join 
 ```
 
 Votos segundo
 ```{r}
 segundo = ganadoresGL %>% group_by(UBIGEO) %>% filter(row_number()==2) %>% mutate(segundoGL10=votos)
 
-data_finalGL10 = left_join(data_finalGL10, segundo[c(1,5)], by="UBIGEO") #join 
+data_distrital10 = left_join(data_distrital10, segundo[c(1,5)], by="UBIGEO") #join 
 ```
 
 
 Calculo concentración:
 
 ```{r}
-data_finalGL10 = data_finalGL10 %>% mutate(concentracionGL10 = primeroGL10/validosGL10 + segundoGL10/validosGL10)
+data_distrital10 = data_distrital10 %>% mutate(concentracionGL10 = primeroGL10/validosGL10 + segundoGL10/validosGL10)
 
 #cuidar casos sin votos validos
-data_finalGL10$concentracionGL10[is.nan(data_finalGL10$concentracionGL10)] = NA 
+data_distrital10$concentracionGL10[is.nan(data_distrital10$concentracionGL10)] = NA 
 ```
 
 Calculo competitividad:
 
 ```{r}
-data_finalGL10 = data_finalGL10 %>% mutate(competitividadGL10 = primeroGL10/validosGL10 - segundoGL10/validosGL10)
+data_distrital10 = data_distrital10 %>% mutate(competitividadGL10 = primeroGL10/validosGL10 - segundoGL10/validosGL10)
 
 #cuidar casos sin votos validos
-data_finalGL10$competitividadGL10[is.nan(data_finalGL10$competitividadGL10)] = NA 
+data_distrital10$competitividadGL10[is.nan(data_distrital10$competitividadGL10)] = NA 
 ```
 
 ###### NEP Y Herfindahl
@@ -383,10 +388,10 @@ NEP y Herfindahl por distrito:
 NEP = dataGL10 %>% group_by(UBIGEO) %>% 
   summarise(NEPGL10 = 1/sum(prop_votos2, na.rm = T))
 
-data_finalGL10 = left_join(data_finalGL10, NEP, by="UBIGEO") #join 
+data_distrital10 = left_join(data_distrital10, NEP, by="UBIGEO") #join 
 
 #cuidar casos sin votos validos
-data_finalGL10$NEPGL10[is.infinite(data_finalGL10$NEPGL10)] = NA 
+data_distrital10$NEPGL10[is.infinite(data_distrital10$NEPGL10)] = NA 
 ```
 
 ## 2006
@@ -407,13 +412,13 @@ Votos emitidos por distritos:
 emitidos = dataGL06 %>% group_by(Ubigeo) %>% 
            summarise(emitidosGL06 = sum(Votos)) 
 
-data_finalGL06 = left_join(electores, emitidos, by="Ubigeo") #join
+data_distrital06 = left_join(electores, emitidos, by="Ubigeo") #join
 ```
 
 Calcular ausentes: 
 
 ```{r}
-data_finalGL06 = data_finalGL06 %>% 
+data_distrital06 = data_distrital06 %>% 
   mutate(ausentesGL06= electoresGL06 - emitidosGL06, 
          por_ausentesGL06 = (ausentesGL06/electoresGL06)*100)
 ```
@@ -425,7 +430,7 @@ validos = dataGL06 %>%
             group_by(Ubigeo) %>% #seleccionar una fila por distrito
            summarise(validosGL06 = max(`Votos vAlidos`, na.rm = T)) 
 
-data_finalGL06 = left_join(data_finalGL06, validos, by="Ubigeo") #join
+data_distrital06 = left_join(data_distrital06, validos, by="Ubigeo") #join
 
 #Ojo, tengo casos con 0 votos validos.. estoy asumiento que esos son blancos y nulos
 ```
@@ -433,16 +438,16 @@ data_finalGL06 = left_join(data_finalGL06, validos, by="Ubigeo") #join
 Votos blancos + nulos
 
 ```{r}
-data_finalGL06 = data_finalGL06 %>% 
+data_distrital06 = data_distrital06 %>% 
   mutate(blancosnulosGL06 = emitidosGL06 - validosGL06, 
          por_blancosnulosGL06 = (blancosnulosGL06/emitidosGL06)*100)
 ```
 
 ```{r}
 #cuidar casos sin votos validos
-data_finalGL06[!is.na(data_finalGL06$validosGL06) &data_finalGL06$validosGL06==0,]$por_ausentesGL06 = NA 
+data_distrital06[!is.na(data_distrital06$validosGL06) &data_distrital06$validosGL06==0,]$por_ausentesGL06 = NA 
 
-data_finalGL06[!is.na(data_finalGL06$validosGL06) &data_finalGL06$validosGL06==0,]$por_blancosnulosGL06 = NA 
+data_distrital06[!is.na(data_distrital06$validosGL06) &data_distrital06$validosGL06==0,]$por_blancosnulosGL06 = NA 
 ```
 
 
@@ -463,32 +468,32 @@ Votos ganador
 ```{r}
 primero = ganadoresGL %>% group_by(Ubigeo) %>% filter(row_number()==1) %>% mutate(primeroGL06=votos)
 
-data_finalGL06 = left_join(data_finalGL06, primero[c(1,5)], by="Ubigeo") #join 
+data_distrital06 = left_join(data_distrital06, primero[c(1,5)], by="Ubigeo") #join 
 ```
 
 Votos segundo
 ```{r}
 segundo = ganadoresGL %>% group_by(Ubigeo) %>% filter(row_number()==2) %>% mutate(segundoGL06=votos)
 
-data_finalGL06 = left_join(data_finalGL06, segundo[c(1,5)], by="Ubigeo") #join 
+data_distrital06 = left_join(data_distrital06, segundo[c(1,5)], by="Ubigeo") #join 
 ```
 
 Calculo concentración:
 
 ```{r}
-data_finalGL06 = data_finalGL06 %>% mutate(concentracionGL06 = primeroGL06/validosGL06 + segundoGL06/validosGL06)
+data_distrital06 = data_distrital06 %>% mutate(concentracionGL06 = primeroGL06/validosGL06 + segundoGL06/validosGL06)
 
 #cuidar casos sin votos validos
-data_finalGL06$concentracionGL06[is.nan(data_finalGL06$concentracionGL06)] = NA 
+data_distrital06$concentracionGL06[is.nan(data_distrital06$concentracionGL06)] = NA 
 ```
 
 Calculo competitividad:
 
 ```{r}
-data_finalGL06 = data_finalGL06 %>% mutate(competitividadGL06 = primeroGL06/validosGL06 - segundoGL06/validosGL06)
+data_distrital06 = data_distrital06 %>% mutate(competitividadGL06 = primeroGL06/validosGL06 - segundoGL06/validosGL06)
 
 #cuidar casos sin votos validos
-data_finalGL06$competitividadGL06[is.nan(data_finalGL06$competitividadGL06)] = NA 
+data_distrital06$competitividadGL06[is.nan(data_distrital06$competitividadGL06)] = NA 
 ```
 
 
@@ -497,7 +502,7 @@ data_finalGL06$competitividadGL06[is.nan(data_finalGL06$competitividadGL06)] = N
 Nep:
 
 ```{r}
-ganadoresGL = left_join(ganadoresGL, data_finalGL06[c(1,6)], by="Ubigeo") #join 
+ganadoresGL = left_join(ganadoresGL, data_distrital06[c(1,6)], by="Ubigeo") #join 
 ```
 
 Calcular proporción de votos validos al cuadrado
@@ -511,8 +516,164 @@ NEP:
 NEP = ganadoresGL %>% group_by(Ubigeo) %>% 
   summarise(NEPGL06 = 1/sum(prop_votos2, na.rm = T))
 
-data_finalGL06 = left_join(data_finalGL06, NEP, by="Ubigeo") #join 
+data_distrital06 = left_join(data_distrital06, NEP, by="Ubigeo") #join 
 
 #cuidar casos sin votos validos
-data_finalGL06[!is.na(data_finalGL06$validosGL06) &data_finalGL06$validosGL06==0,]$NEPGL06 = NA 
+data_distrital06[!is.na(data_distrital06$validosGL06) &data_distrital06$validosGL06==0,]$NEPGL06 = NA 
+```
+
+## 2002
+
+```{r}
+dataGL02=read_xlsx("TablaDistrital2002.xlsx")
+```
+
+```{r}
+electores = dataGL02 %>% 
+            group_by(UBIGEO) %>% #seleccionar una fila por distrito
+           summarise(electoresGL02 = sum(max(NUMAUSENTES) + max(NUM_VOTOS_EMITIDOS), na.rm = T)) 
+```
+
+```{r}
+emitidos = dataGL02 %>% group_by(UBIGEO) %>% 
+           summarise(emitidosGL02 = max(NUM_VOTOS_EMITIDOS, na.rm = T)) 
+
+data_distrital02 = left_join(electores, emitidos, by="UBIGEO") #join
+```
+
+Calcular ausentes: 
+
+```{r}
+data_distrital02 = data_distrital02 %>% 
+  mutate(ausentesGL02= electoresGL02 - emitidosGL02, 
+         por_ausentesGL02 = (ausentesGL02/electoresGL02)*100)
+```
+
+votos validos:
+
+```{r}
+validos = dataGL02 %>% 
+            group_by(UBIGEO) %>% #seleccionar una fila por distrito
+           summarise(validosGL02 = sum(NUM_VOTOS_ORGPOL, na.rm = T)) 
+
+data_distrital02 = left_join(data_distrital02, validos, by="UBIGEO") #join
+
+#Ojo, tengo casos con 0 votos validos.. estoy asumiento que esos son blancos y nulos
+```
+
+Votos blancos + nulos
+
+```{r}
+data_distrital02 = data_distrital02 %>% 
+  mutate(blancosnulosGL02 = emitidosGL02 - validosGL02, 
+         por_blancosnulosGL02 = (blancosnulosGL02/emitidosGL02)*100)
+```
+
+```{r}
+#cuidar casos sin votos validos
+data_distrital02[!is.na(data_distrital02$validosGL02) &data_distrital02$validosGL02==0,]$por_ausentesGL02 = NA 
+
+data_distrital02[!is.na(data_distrital02$validosGL02) &data_distrital02$validosGL02==0,]$por_blancosnulosGL02 = NA 
+```
+
+```{r}
+ganadoresGL =dataGL02 %>% group_by(UBIGEO, TIPOORGPOL) %>% summarise(votos = sum(NUM_VOTOS_ORGPOL, na.rm = T))  %>% mutate(ganadorGL06 = TIPOORGPOL)
+```
+
+```{r}
+ganadoresGL = ganadoresGL[order(ganadoresGL$UBIGEO,-ganadoresGL$votos),]
+```
+
+
+Votos ganador
+```{r}
+primero = ganadoresGL %>% group_by(UBIGEO) %>% filter(row_number()==1) %>% mutate(primeroGL02=votos)
+
+data_distrital02 = left_join(data_distrital02, primero[c(1,5)], by="UBIGEO") #join 
+```
+
+Votos segundo
+```{r}
+segundo = ganadoresGL %>% group_by(UBIGEO) %>% filter(row_number()==2) %>% mutate(segundoGL02=votos)
+
+data_distrital02 = left_join(data_distrital02, segundo[c(1,5)], by="UBIGEO") #join 
+```
+
+Calculo concentración:
+
+```{r}
+data_distrital02 = data_distrital02 %>% mutate(concentracionGL02 = primeroGL02/validosGL02 + segundoGL02/validosGL02)
+
+#cuidar casos sin votos validos
+data_distrital02$concentracionGL02[is.nan(data_distrital02$concentracionGL02)] = NA 
+```
+
+Calculo competitividad:
+
+```{r}
+data_distrital02 = data_distrital02 %>% mutate(competitividadGL02 = primeroGL02/validosGL02 - segundoGL02/validosGL02)
+
+#cuidar casos sin votos validos
+data_distrital02$competitividadGL02[is.nan(data_distrital02$competitividadGL02)] = NA 
+```
+
+###### NEP Y Herfindahl
+
+Calcular proporción de votos validos al cuadrado
+
+```{r}
+dataGL02$prop_votos2 = (dataGL02$NUM_VOTOS_ORGPOL/dataGL02$NUM_VOTOS_VAL)^2
+```
+
+NEP y Herfindahl por distrito:
+
+```{r}
+NEP = dataGL02 %>% group_by(UBIGEO) %>% 
+  summarise(NEPGL02 = 1/sum(prop_votos2, na.rm = T))
+
+data_distrital02 = left_join(data_distrital02, NEP, by="UBIGEO") #join 
+#cuidar casos sin votos validos
+data_distrital02$NEPGL02[is.infinite(data_distrital02$NEPGL02)] = NA 
+```
+
+
+```{r}
+equiv= read_xlsx("tabladeequivalenciasJI.xlsx")
+```
+
+```{r}
+data_distrital18=merge(data_distrital18, equiv[c(1,2)], by.x="TXUBIGEO", by.y="UBIGEO_INEI")
+```
+
+
+```{r}
+ubigeos=read.csv("ID MAPAS DISTRITAL.csv")
+```
+
+```{r}
+ubigeos$TXUBIGEO=ifelse(nchar(ubigeos$TXUBIGEO)==5, paste0("0",ubigeos$TXUBIGEO),ubigeos$TXUBIGEO)
+```
+
+```{r}
+data_distrital18=merge(data_distrital18, ubigeos[c(4,5)], by.x="UBIGEO_RENIEC", by.y="TXUBIGEO")
+```
+
+```{r}
+data_distrital=merge(data_distrital18, data_distrital14, by.x="UBIGEO_RENIEC", by.y="TXUBIGEO", all.x=T)
+```
+
+```{r}
+data_distrital=merge(data_distrital, data_distrital10, by.x="UBIGEO_RENIEC", by.y="UBIGEO", all.x=T)
+```
+
+```{r}
+data_distrital=merge(data_distrital, data_distrital06, by.x="UBIGEO_RENIEC", by.y="Ubigeo", all.x=T)
+```
+
+```{r}
+data_distrital=merge(data_distrital, data_distrital02, by.x="UBIGEO_RENIEC", by.y="UBIGEO", all.x=T)
+```
+
+```{r}
+save(data_distrital, file = "data_distrital.rda")
 ```
